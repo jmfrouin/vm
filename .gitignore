@@ -1,0 +1,190 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Build directories
+build/
+cmake-build-*/
+out/
+bin/
+lib/
+
+# IDE files
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# CLion
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+build/
+DerivedData/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+*.moc.cpp
+ui_*.h
+
+# Conan
+conanfile.txt
+conaninfo.txt
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conandata.yml
+
+# vcpkg
+vcpkg_installed/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Core dumps
+core
+core.*
+
+# Temporary files
+*~
+*.swp
+*.swo
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Documentation build
+doc/html/
+doc/latex/
+docs/_build/
+docs/build/
+
+# Test results
+*.xml
+Testing/
+test_results/
+
+# Coverage reports
+*.gcov
+*.gcno
+*.gcda
+coverage.info
+coverage/
+
+# Profiling data
+*.prof
+gmon.out
+
+# Package files
+*.deb
+*.rpm
+*.pkg
+*.dmg
+*.msi
+
+# VM specific files (pour votre projet)
+# Fichiers de programmes assemblés
+*.vm
+*.vma
+*.vmbin
+
+# Fichiers de disque virtuel
+*.vdisk
+*.vhd
+
+# Fichiers de trace et de debug
+trace_*.txt
+debug_*.log
+
+# Fichiers de sauvegarde d'état VM
+*.vmstate
+*.vmsave
+
+# Exemples compilés
+examples/build/
+tools/build/
+
+# Scripts de test temporaires
+test_programs/
+temp_asm/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# IDE settings directories
+.settings/
+.project
+.cproject
+
+# Clang tools
+.clang-format
+.clang-tidy
+
+# Sanitizer output
+*.san
