@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(VM)
+project(vm)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,6 +10,7 @@ include_directories(src/cpu)
 include_directories(src/memory)
 include_directories(src/io)
 include_directories(src/storage)
+include_directories(src/vm)
 
 # Source files
 file(GLOB_RECURSE SOURCES
@@ -18,7 +19,7 @@ file(GLOB_RECURSE SOURCES
 )
 
 # Main executable
-add_executable(VM main.cpp ${SOURCES})
+add_executable(vm main.cpp ${SOURCES})
 
 # Enable debug symbols and warnings
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra")

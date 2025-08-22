@@ -1,11 +1,14 @@
 //
 // Created by Jean-Michel Frouin on 17/08/2025.
 //
-#include "src/vm.h"
+#include "src/vm/vm.h"
+#include "src/vm/firmware_loader.h"
 #include <iostream>
 #include <vector>
+#include <string>
+#include <cstring>
 
-// Fonction utilitaire pour créer une instruction
+// Utility function to create an instruction
 uint64_t makeInstruction(vm::Opcode opcode, vm::AddressingMode mode,
                         uint8_t reg1, uint8_t reg2, uint32_t immediate) {
     uint64_t instr = 0;
@@ -17,51 +20,171 @@ uint64_t makeInstruction(vm::Opcode opcode, vm::AddressingMode mode,
     return instr;
 }
 
-int main() {
-    std::cout << "=== Machine Virtuelle Éducative ===" << std::endl;
-
-    // Création de la VM avec 1MB de RAM
-    vm::VirtualMachine vm(1024 * 1024);
-    vm.enableDebugger(true);
-
-    // Programme de test simple
-    std::vector<uint64_t> program = {
-        // MOV R0, #42 (charger 42 dans R0)
+std::vector<uint64_t> createTestProgram() {
+    // Simple test program
+    return {
+        // MOV R0, #42 (load 42 into R0)
         makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 0, 0, 42),
 
-        // MOV R1, #10 (charger 10 dans R1)
+        // MOV R1, #10 (load 10 into R1)
         makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 1, 0, 10),
 
         // ADD R0, R1 (R0 = R0 + R1)
         makeInstruction(vm::Opcode::ADD, vm::AddressingMode::REGISTER, 0, 1, 0),
 
-        // PUSH R0 (sauvegarder le résultat sur la pile)
+        // PUSH R0 (save result to stack)
         makeInstruction(vm::Opcode::PUSH, vm::AddressingMode::REGISTER, 0, 0, 0),
 
-        // POP R2 (récupérer le résultat dans R2)
+        // POP R2 (retrieve result into R2)
         makeInstruction(vm::Opcode::POP, vm::AddressingMode::REGISTER, 2, 0, 0),
 
-        // HLT (arrêter la VM)
+        // HLT (stop the VM)
         makeInstruction(vm::Opcode::HLT, vm::AddressingMode::REGISTER, 0, 0, 0)
     };
+}
 
-    // Chargement et exécution du programme
+void runDemo() {
+    std::cout << "=== Educational Virtual Machine - Demo Mode ===" << std::endl;
+
+    // Create VM with 1MB of RAM
+    vm::VirtualMachine vm(1024 * 1024);
+    vm.enableDebugger(true);
+
+    std::vector<uint64_t> program = createTestProgram();
+
+    // Load and execute program
     if (vm.loadProgram(program)) {
-        std::cout << "\nÉtat initial:" << std::endl;
+        std::cout << "\nInitial state:" << std::endl;
         vm.printState();
 
-        std::cout << "\nExécution du programme..." << std::endl;
+        std::cout << "\nExecuting program..." << std::endl;
         vm.run();
 
-        std::cout << "\nÉtat final:" << std::endl;
+        std::cout << "\nFinal state:" << std::endl;
         vm.printState();
 
-        std::cout << "\nDump mémoire (pile):" << std::endl;
+        std::cout << "\nMemory dump (stack):" << std::endl;
         vm.dumpMemory(vm.getMemory().getSize() - 0x100, 64);
 
-        std::cout << "\nRésultat attendu: R2 = 52 (42 + 10)" << std::endl;
-        std::cout << "Résultat obtenu: R2 = " << std::dec
+        std::cout << "\nExpected result: R2 = 52 (42 + 10)" << std::endl;
+        std::cout << "Actual result: R2 = " << std::dec
                   << vm.getCPU().getRegister(2) << std::endl;
+    }
+}
+
+void runFirmware(const std::string& filename) {
+    std::cout << "=== Educational Virtual Machine - Firmware Mode ===" << std::endl;
+    std::cout << "Loading firmware: " << filename << std::endl;
+
+    // Create VM with 1MB of RAM
+    vm::VirtualMachine vm(1024 * 1024);
+    vm.enableDebugger(true);
+
+    // Load firmware
+    std::vector<uint64_t> instructions;
+    if (!vm::FirmwareLoader::loadFirmware(filename, instructions)) {
+        std::cerr << "Error: Failed to load firmware file: " << filename << std::endl;
+        return;
+    }
+
+    // Load and execute firmware
+    if (vm.loadProgram(instructions)) {
+        std::cout << "\nInitial state:" << std::endl;
+        vm.printState();
+
+        std::cout << "\nExecuting firmware..." << std::endl;
+        vm.run();
+
+        std::cout << "\nFinal state:" << std::endl;
+        vm.printState();
+
+        std::cout << "\nMemory dump (stack):" << std::endl;
+        vm.dumpMemory(vm.getMemory().getSize() - 0x100, 64);
+    }
+}
+
+void generateTestFirmware() {
+    std::cout << "=== Educational Virtual Machine - Test Firmware Generation ===" << std::endl;
+    
+    const std::string filename = "firmware.vmfw";
+    const std::string description = "Test firmware: Simple arithmetic operations (42 + 10)";
+    
+    std::vector<uint64_t> program = createTestProgram();
+    
+    if (vm::FirmwareLoader::saveFirmware(filename, program, description)) {
+        std::cout << "\nTest firmware generated successfully!" << std::endl;
+        std::cout << "You can now run it with: " << std::endl;
+        std::cout << "  ./vm -f " << filename << std::endl;
+        
+        // Print firmware info for verification
+        std::cout << "\n";
+        vm::FirmwareLoader::printFirmwareInfo(filename);
+    } else {
+        std::cerr << "Error: Failed to generate test firmware" << std::endl;
+    }
+}
+
+void printUsage(const char* programName) {
+    std::cout << "Usage: " << programName << " [OPTIONS]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -d              Run demo mode (default)" << std::endl;
+    std::cout << "  -f <filename>   Load and execute firmware file" << std::endl;
+    std::cout << "  -t              Generate test firmware file (firmware.vmfw)" << std::endl;
+    std::cout << "  -h, --help      Show this help message" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Examples:" << std::endl;
+    std::cout << "  " << programName << "                    # Run demo mode" << std::endl;
+    std::cout << "  " << programName << " -t                 # Generate test firmware" << std::endl;
+    std::cout << "  " << programName << " -f firmware.vmfw   # Run firmware file" << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    // Default mode is demo
+    enum Mode { DEMO, FIRMWARE, GENERATE_TEST };
+    Mode mode = DEMO;
+    std::string firmwareFile;
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-d") == 0) {
+            mode = DEMO;
+        } else if (strcmp(argv[i], "-f") == 0) {
+            if (i + 1 < argc) {
+                firmwareFile = argv[i + 1];
+                mode = FIRMWARE;
+                ++i; // Skip the filename argument
+            } else {
+                std::cerr << "Error: -f option requires a filename" << std::endl;
+                printUsage(argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "-t") == 0) {
+            mode = GENERATE_TEST;
+        } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+            printUsage(argv[0]);
+            return 0;
+        } else {
+            std::cerr << "Error: Unknown option: " << argv[i] << std::endl;
+            printUsage(argv[0]);
+            return 1;
+        }
+    }
+
+    try {
+        switch (mode) {
+            case DEMO:
+                runDemo();
+                break;
+            case FIRMWARE:
+                runFirmware(firmwareFile);
+                break;
+            case GENERATE_TEST:
+                generateTestFirmware();
+                break;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
 
     return 0;

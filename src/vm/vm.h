@@ -6,8 +6,8 @@
 #ifndef VM_H
 #define VM_H
 
-#include "cpu/cpu.h"
-#include "memory/memory.h"
+#include "../cpu/cpu.h"
+#include "../memory/memory.h"
 #include <string>
 #include <vector>
 

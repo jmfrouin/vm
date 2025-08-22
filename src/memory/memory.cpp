@@ -15,6 +15,7 @@ namespace vm {
         // Segments par défaut
         addSegment(MemorySegment(0x000000, 0x100000,
                    static_cast<AccessType>(static_cast<uint8_t>(AccessType::READ) |
+                                         static_cast<uint8_t>(AccessType::WRITE) |
                                          static_cast<uint8_t>(AccessType::EXECUTE)),
                    "CODE"));
         addSegment(MemorySegment(0x100000, 0x100000,
