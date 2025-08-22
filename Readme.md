@@ -23,8 +23,25 @@ This project implements a basic virtual machine with:
 
 ## Project Structure
 
-VM/ ├── src/ │ ├── common/ │ │ └── types.h # Common type definitions │ ├── cpu/ │ │ ├── cpu.h # CPU class definition │ │ └── cpu.cpp # CPU implementation │ ├── memory/ │ │ ├── memory.h # Memory class definition │ │ └── memory.cpp # Memory implementation │ └── vm/ │ ├── vm.h # Virtual machine class definition │ ├── vm.cpp # Virtual machine implementation │ ├── firmware_loader.h # Firmware handling definition │ └── firmware_loader.cpp # Firmware handling implementation ├── main.cpp # Main application entry point ├── CMakeLists.txt # CMake build configuration └── README.md # This file
-
+```
+├── src/  
+├── common/ 
+│ └── types.h # Common type definitions 
+├── cpu/ │ 
+│├── cpu.h # CPU class definition
+│ └── cpu.cpp # CPU implementation 
+├── memory/
+├── memory.h # Memory class definition 
+│ └── memory.cpp # Memory implementation
+│ └── vm/
+├── vm.h # Virtual machine class definition 
+├── vm.cpp # Virtual machine implementation 
+├── firmware_loader.h # Firmware handling definition 
+└── firmware_loader.cpp # Firmware handling implementation
+├── main.cpp # Main application entry point
+├── CMakeLists.txt # CMake build configuration
+│└── README.md # This file
+```
 
 ## Building the Project
 
