@@ -147,7 +147,6 @@ MOV R1, #10
 // Stop execution HLT
 ```
 
-
 ## Firmware Format
 
 Firmware files use a binary format with the following structure:

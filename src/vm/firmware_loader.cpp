@@ -29,6 +29,10 @@ namespace vm {
         // Write header
         file.write(reinterpret_cast<const char*>(&header), sizeof(header));
 
+        // Write separator character between header and instructions
+        char separator = '|';
+        file.write(&separator, 1);
+
         // Write instructions
         file.write(reinterpret_cast<const char*>(instructions.data()),
                   instructions.size() * sizeof(uint64_t));
@@ -70,6 +74,14 @@ namespace vm {
             return false;
         }
 
+        // Read and verify separator character
+        char separator;
+        file.read(&separator, 1);
+        if (file.gcount() != 1 || separator != '|') {
+            std::cerr << "Error: missing or invalid separator character" << std::endl;
+            return false;
+        }
+
         instructions.clear();
         instructions.resize(header.instructionCount);
 
@@ -106,6 +118,10 @@ namespace vm {
             return;
         }
 
+        // Read separator character for verification
+        char separator;
+        file.read(&separator, 1);
+        
         std::cout << "=== Firmware Information ===" << std::endl;
         std::cout << "File: " << filename << std::endl;
         std::cout << "Signature: " << std::string(header.signature, 4) << std::endl;
@@ -113,6 +129,12 @@ namespace vm {
         std::cout << "Instructions: " << header.instructionCount << std::endl;
         std::cout << "Entry Point: " << header.entryPoint << std::endl;
         std::cout << "Description: " << header.description << std::endl;
+        
+        if (file.gcount() == 1 && separator == '|') {
+            std::cout << "Separator: Found ('|')" << std::endl;
+        } else {
+            std::cout << "Separator: Missing or invalid" << std::endl;
+        }
 
         file.close();
     }
