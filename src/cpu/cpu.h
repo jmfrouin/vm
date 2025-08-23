@@ -18,55 +18,55 @@ namespace vm {
         bool mDebug;
 
         // Méthodes privées
-        void fetchInstruction(Instruction& instr);
-        void decodeInstruction(const Instruction& instr);
-        void executeInstruction(const Instruction& instr);
+        void FetchInstruction(Instruction& instr);
+        void DecodeInstruction(const Instruction& instr);
+        void ExecuteInstruction(const Instruction& instr);
 
         // Instructions spécifiques
-        void executeMov(const Instruction& instr);
-        void executeLoad(const Instruction& instr);
-        void executeStore(const Instruction& instr);
-        void executePush(const Instruction& instr);
-        void executePop(const Instruction& instr);
-        void executeAdd(const Instruction& instr);
-        void executeSub(const Instruction& instr);
-        void executeJmp(const Instruction& instr);
-        void executeCall(const Instruction& instr);
-        void executeRet(const Instruction& instr);
-        void executeHlt(const Instruction& instr);
+        void ExecuteMov(const Instruction& instr);
+        void ExecuteLoad(const Instruction& instr);
+        void ExecuteStore(const Instruction& instr);
+        void ExecutePush(const Instruction& instr);
+        void ExecutePop(const Instruction& instr);
+        void ExecuteAdd(const Instruction& instr);
+        void ExecuteSub(const Instruction& instr);
+        void ExecuteJmp(const Instruction& instr);
+        void ExecuteCall(const Instruction& instr);
+        void ExecuteRet(const Instruction& instr);
+        void ExecuteHlt(const Instruction& instr);
 
-        uint64_t getOperandValue(const Instruction& instr, bool isSecondOperand = false);
-        void setOperandValue(const Instruction& instr, uint64_t value, bool isSecondOperand = false);
+        uint64_t GetOperandValue(const Instruction& instr, bool isSecondOperand = false);
+        void SetOperandValue(const Instruction& instr, uint64_t value, bool isSecondOperand = false);
 
     public:
         CPU(Memory* mem);
         ~CPU() = default;
 
-        void reset();
-        void step();            // Exécute une instruction
-        void run();             // Boucle d'exécution
-        void halt() { mRunning = false; }
-        bool isRunning() const { return mRunning; }
+        void Reset();
+        void Step();            // Exécute une instruction
+        void Run();             // Boucle d'exécution
+        void Halt() { mRunning = false; }
+        bool IsRunning() const { return mRunning; }
 
         // Gestion des interruptions
-        void handleInterrupt(int num);
+        void HandleInterrupt(int num);
 
         // Gestion des drapeaux
-        void setFlag(FlagType flag, bool value);
-        bool getFlag(FlagType flag) const;
-        void updateFlags(uint64_t result, bool carry = false, bool overflow = false);
+        void SetFlag(FlagType flag, bool value);
+        bool GetFlag(FlagType flag) const;
+        void UpdateFlags(uint64_t result, bool carry = false, bool overflow = false);
 
         // Accès aux registres
-        uint64_t getRegister(uint8_t reg) const;
-        void setRegister(uint8_t reg, uint64_t value);
-        uint64_t getPC() const { return mPC; }
-        void setPC(uint64_t address) { mPC = address; }
-        uint64_t getSP() const { return mSP; }
-        void setSP(uint64_t address) { mSP = address; }
+        uint64_t GetRegister(uint8_t reg) const;
+        void SetRegister(uint8_t reg, uint64_t value);
+        uint64_t GetPC() const { return mPC; }
+        void SetPC(uint64_t address) { mPC = address; }
+        uint64_t GetSP() const { return mSP; }
+        void SetSP(uint64_t address) { mSP = address; }
 
         // Debug
-        void enableDebug(bool enable = true) { mDebug = enable; }
-        void printState() const;
+        void EnableDebug(bool enable = true) { mDebug = enable; }
+        void PrintState() const;
     };
 }
 

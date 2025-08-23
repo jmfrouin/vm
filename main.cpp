@@ -48,27 +48,27 @@ void runDemo() {
 
     // Create VM with 1MB of RAM
     vm::VirtualMachine vm(1024 * 1024);
-    vm.enableDebugger(true);
+    vm.EnableDebugger(true);
 
     std::vector<uint64_t> program = createTestProgram();
 
     // Load and execute program
-    if (vm.loadProgram(program)) {
+    if (vm.LoadProgram(program)) {
         std::cout << "\nInitial state:" << std::endl;
-        vm.printState();
+        vm.PrintState();
 
         std::cout << "\nExecuting program..." << std::endl;
-        vm.run();
+        vm.Run();
 
         std::cout << "\nFinal state:" << std::endl;
-        vm.printState();
+        vm.PrintState();
 
         std::cout << "\nMemory dump (stack):" << std::endl;
-        vm.dumpMemory(vm.getMemory().getSize() - 0x100, 64);
+        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 64);
 
         std::cout << "\nExpected result: R2 = 52 (42 + 10)" << std::endl;
         std::cout << "Actual result: R2 = " << std::dec
-                  << vm.getCPU().getRegister(2) << std::endl;
+                  << vm.GetCPU().GetRegister(2) << std::endl;
     }
 }
 
@@ -78,28 +78,28 @@ void runFirmware(const std::string& filename) {
 
     // Create VM with 1MB of RAM
     vm::VirtualMachine vm(1024 * 1024);
-    vm.enableDebugger(true);
+    vm.EnableDebugger(true);
 
     // Load firmware
     std::vector<uint64_t> instructions;
-    if (!vm::FirmwareLoader::loadFirmware(filename, instructions)) {
+    if (!vm::FirmwareLoader::LoadFirmware(filename, instructions)) {
         std::cerr << "Error: Failed to load firmware file: " << filename << std::endl;
         return;
     }
 
     // Load and execute firmware
-    if (vm.loadProgram(instructions)) {
+    if (vm.LoadProgram(instructions)) {
         std::cout << "\nInitial state:" << std::endl;
-        vm.printState();
+        vm.PrintState();
 
         std::cout << "\nExecuting firmware..." << std::endl;
-        vm.run();
+        vm.Run();
 
         std::cout << "\nFinal state:" << std::endl;
-        vm.printState();
+        vm.PrintState();
 
         std::cout << "\nMemory dump (stack):" << std::endl;
-        vm.dumpMemory(vm.getMemory().getSize() - 0x100, 64);
+        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 64);
     }
 }
 
@@ -111,14 +111,14 @@ void generateTestFirmware() {
     
     std::vector<uint64_t> program = createTestProgram();
     
-    if (vm::FirmwareLoader::saveFirmware(filename, program, description)) {
+    if (vm::FirmwareLoader::SaveFirmware(filename, program, description)) {
         std::cout << "\nTest firmware generated successfully!" << std::endl;
         std::cout << "You can now run it with: " << std::endl;
         std::cout << "  ./vm -f " << filename << std::endl;
         
         // Print firmware info for verification
         std::cout << "\n";
-        vm::FirmwareLoader::printFirmwareInfo(filename);
+        vm::FirmwareLoader::PrintFirmwareInfo(filename);
     } else {
         std::cerr << "Error: Failed to generate test firmware" << std::endl;
     }

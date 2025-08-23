@@ -1,48 +1,54 @@
-//
-// Created by Jean-Michel Frouin on 17/08/2025.
-//
+// src/vm/vm.h
+#ifndef VM_VIRTUAL_MACHINE_H
+#define VM_VIRTUAL_MACHINE_H
 
-// src/vm.h
-#ifndef VM_H
-#define VM_H
-
-#include "../cpu/cpu.h"
-#include "../memory/memory.h"
-#include <string>
+#include <common/types.h>
+#include <memory/memory.h>
+#include <cpu/cpu.h>
 #include <vector>
+#include <memory>
 
 namespace vm {
     class VirtualMachine {
     private:
-        Memory memory;
-        CPU cpu;
-        bool debug_enabled;
+        std::unique_ptr<Memory> mMemory;
+        std::unique_ptr<CPU> mCPU;
+        bool mDebugMode;
+        bool mRunning;
+
+        // Méthodes privées
+        void InitializeSystem();
+        void Shutdown();
 
     public:
         VirtualMachine(size_t memorySize = 1024 * 1024); // 1MB par défaut
-        ~VirtualMachine() = default;
+        ~VirtualMachine();
 
-        // Contrôle de la VM
-        void reset();
-        void run();
-        void step();
-        void halt();
-
-        // Chargement de programmes
-        bool loadProgram(const std::vector<uint64_t>& program, uint64_t loadAddress = 0);
-        bool loadProgramFromFile(const std::string& filename);
-
-        // Debug et introspection
-        void enableDebugger(bool enable = true);
-        void printState() const;
-        void dumpMemory(uint64_t start, uint64_t length) const;
+        // Gestion du cycle de vie
+        bool LoadProgram(const std::vector<uint64_t>& program, uint64_t startAddress = 0);
+        void Run();
+        void Step();
+        void Stop();
+        void Reset();
 
         // Accès aux composants
-        CPU& getCPU() { return cpu; }
-        Memory& getMemory() { return memory; }
-        const CPU& getCPU() const { return cpu; }
-        const Memory& getMemory() const { return memory; }
+        Memory& GetMemory() { return *mMemory; }
+        const Memory& GetMemory() const { return *mMemory; }
+        CPU& GetCPU() { return *mCPU; }
+        const CPU& GetCPU() const { return *mCPU; }
+
+        // Debug et monitoring
+        void EnableDebugger(bool enable = true) { mDebugMode = enable; }
+        bool IsDebugging() const { return mDebugMode; }
+        bool IsRunning() const { return mRunning; }
+        void PrintState() const;
+        void DumpMemory(uint64_t start, uint64_t length) const;
+
+        // Utilitaires
+        void DumpRegisters() const;
+        void SetBreakpoint(uint64_t address);
+        void RemoveBreakpoint(uint64_t address);
     };
 }
 
-#endif // VM_H
+#endif // VM_VIRTUAL_MACHINE_H
