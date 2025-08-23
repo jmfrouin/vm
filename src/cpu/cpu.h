@@ -9,13 +9,13 @@
 namespace vm {
     class CPU {
     private:
-        std::array<uint64_t, REGISTER_COUNT> registers;
-        uint64_t pc;        // Program Counter
-        uint64_t sp;        // Stack Pointer
-        uint32_t flags;     // Registre de drapeaux
-        Memory* memory;
-        bool running;
-        bool debug_mode;
+        std::array<uint64_t, REGISTER_COUNT> mRegisters;
+        uint64_t mPC;        // Program Counter
+        uint64_t mSP;        // Stack Pointer
+        uint32_t mFlags;     // Registre de drapeaux
+        Memory* mMemory;
+        bool mRunning;
+        bool mDebug;
 
         // Méthodes privées
         void fetchInstruction(Instruction& instr);
@@ -45,8 +45,8 @@ namespace vm {
         void reset();
         void step();            // Exécute une instruction
         void run();             // Boucle d'exécution
-        void halt() { running = false; }
-        bool isRunning() const { return running; }
+        void halt() { mRunning = false; }
+        bool isRunning() const { return mRunning; }
 
         // Gestion des interruptions
         void handleInterrupt(int num);
@@ -59,13 +59,13 @@ namespace vm {
         // Accès aux registres
         uint64_t getRegister(uint8_t reg) const;
         void setRegister(uint8_t reg, uint64_t value);
-        uint64_t getPC() const { return pc; }
-        void setPC(uint64_t address) { pc = address; }
-        uint64_t getSP() const { return sp; }
-        void setSP(uint64_t address) { sp = address; }
+        uint64_t getPC() const { return mPC; }
+        void setPC(uint64_t address) { mPC = address; }
+        uint64_t getSP() const { return mSP; }
+        void setSP(uint64_t address) { mSP = address; }
 
         // Debug
-        void enableDebug(bool enable = true) { debug_mode = enable; }
+        void enableDebug(bool enable = true) { mDebug = enable; }
         void printState() const;
     };
 }

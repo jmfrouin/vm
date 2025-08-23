@@ -34,8 +34,7 @@ namespace vm {
         file.write(&separator, 1);
 
         // Write instructions
-        file.write(reinterpret_cast<const char*>(instructions.data()),
-                  instructions.size() * sizeof(uint64_t));
+        file.write(reinterpret_cast<const char*>(instructions.data()),instructions.size() * sizeof(uint64_t));
 
         file.close();
 

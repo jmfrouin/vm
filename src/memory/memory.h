@@ -10,21 +10,22 @@
 #include <map>
 
 namespace vm {
+    // Dans le struct MemorySegment, si vous voulez appliquer la convention :
     struct MemorySegment {
-        uint64_t base;
-        uint64_t size;
-        AccessType permissions;
-        std::string name;
+        uint64_t mBase;
+        uint64_t mSize;
+        AccessType mPermissions;
+        std::string mName;
 
         MemorySegment(uint64_t b, uint64_t s, AccessType p, const std::string& n)
-            : base(b), size(s), permissions(p), name(n) {}
+            : mBase(b), mSize(s), mPermissions(p), mName(n) {}
     };
 
     class Memory {
     private:
-        std::vector<uint8_t> ram;
-        size_t size;
-        std::vector<MemorySegment> segments;
+        std::vector<uint8_t> mRam;
+        size_t mSize;
+        std::vector<MemorySegment> mSegments;
 
         bool isValidAddress(uint64_t addr) const;
         bool checkAccess(uint64_t addr, AccessType type) const;
@@ -51,7 +52,7 @@ namespace vm {
         // Utilitaires
         void clear();
         void dump(uint64_t start, uint64_t length) const;
-        size_t getSize() const { return size; }
+        size_t getSize() const { return mSize; }
     };
 }
 

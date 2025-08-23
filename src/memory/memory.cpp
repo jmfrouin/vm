@@ -9,8 +9,8 @@
 #include <stdexcept>
 
 namespace vm {
-    Memory::Memory(size_t memSize) : size(memSize) {
-        ram.resize(memSize, 0);
+    Memory::Memory(size_t memSize) : mSize(memSize) {
+        mRam.resize(memSize, 0);
 
         // Segments par défaut
         addSegment(MemorySegment(0x000000, 0x100000,
@@ -33,13 +33,13 @@ namespace vm {
     }
 
     bool Memory::isValidAddress(uint64_t addr) const {
-        return addr < size;
+        return addr < mSize;
     }
 
     bool Memory::checkAccess(uint64_t addr, AccessType type) const {
-        for (const auto& segment : segments) {
-            if (addr >= segment.base && addr < segment.base + segment.size) {
-                return (static_cast<uint8_t>(segment.permissions) & static_cast<uint8_t>(type)) != 0;
+        for (const auto& segment : mSegments) {
+            if (addr >= segment.mBase && addr < segment.mBase + segment.mSize) {
+                return (static_cast<uint8_t>(segment.mPermissions) & static_cast<uint8_t>(type)) != 0;
             }
         }
         return false;
@@ -52,7 +52,7 @@ namespace vm {
         if (!checkAccess(addr, AccessType::READ)) {
             throw std::runtime_error("Memory access violation (read) at: 0x" + std::to_string(addr));
         }
-        return ram[addr];
+        return mRam[addr];
     }
 
     uint16_t Memory::read16(uint64_t addr) {
@@ -77,7 +77,7 @@ namespace vm {
         if (!checkAccess(addr, AccessType::WRITE)) {
             throw std::runtime_error("Memory access violation (write) at: 0x" + std::to_string(addr));
         }
-        ram[addr] = value;
+        mRam[addr] = value;
     }
 
     void Memory::write16(uint64_t addr, uint16_t value) {
@@ -96,7 +96,7 @@ namespace vm {
     }
 
     void Memory::addSegment(const MemorySegment& segment) {
-        segments.push_back(segment);
+        mSegments.push_back(segment);
     }
 
     bool Memory::checkPermissions(uint64_t addr, AccessType type) const {
@@ -104,26 +104,26 @@ namespace vm {
     }
 
     void Memory::clear() {
-        std::fill(ram.begin(), ram.end(), 0);
+        std::fill(mRam.begin(), mRam.end(), 0);
     }
 
     void Memory::dump(uint64_t start, uint64_t length) const {
         std::cout << "\n=== Memory Dump ===" << std::endl;
-        for (uint64_t i = 0; i < length && (start + i) < size; i += 16) {
+        for (uint64_t i = 0; i < length && (start + i) < mSize; i += 16) {
             std::cout << "0x" << std::hex << std::setfill('0') << std::setw(8) << (start + i) << ": ";
 
             // Affichage hexadécimal
-            for (int j = 0; j < 16 && (start + i + j) < size; ++j) {
+            for (int j = 0; j < 16 && (start + i + j) < mSize; ++j) {
                 std::cout << std::hex << std::setfill('0') << std::setw(2)
-                         << static_cast<int>(ram[start + i + j]) << " ";
+                         << static_cast<int>(mRam[start + i + j]) << " ";
             }
 
             // Espacement
             std::cout << " | ";
 
             // Affichage ASCII
-            for (int j = 0; j < 16 && (start + i + j) < size; ++j) {
-                char c = ram[start + i + j];
+            for (int j = 0; j < 16 && (start + i + j) < mSize; ++j) {
+                char c = mRam[start + i + j];
                 std::cout << (isprint(c) ? c : '.');
             }
             std::cout << std::endl;

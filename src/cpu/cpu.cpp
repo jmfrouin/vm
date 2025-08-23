@@ -2,31 +2,32 @@
 // Created by Jean-Michel Frouin on 17/08/2025.
 //
 // src/cpu/cpu.cpp
+
 #include "cpu.h"
 #include <iostream>
 #include <iomanip>
 
 namespace vm {
-    CPU::CPU(Memory* mem) : memory(mem), running(false), debug_mode(false) {
+    CPU::CPU(Memory* mem) : mMemory(mem), mRunning(false), mDebug(false) {
         reset();
     }
 
     void CPU::reset() {
-        registers.fill(0);
-        pc = 0;
-        sp = 0xFFFFF0; // Début de la pile en haut de la mémoire
-        flags = 0;
-        running = false;
+        mRegisters.fill(0);
+        mPC = 0;
+        mSP = 0xFFFFF0; // Début de la pile en haut de la mémoire
+        mFlags = 0;
+        mRunning = false;
     }
 
     void CPU::step() {
-        if (!running) return;
+        if (!mRunning) return;
 
         Instruction instr;
         fetchInstruction(instr);
 
-        if (debug_mode) {
-            std::cout << "PC: 0x" << std::hex << pc << " - ";
+        if (mDebug) {
+            std::cout << "PC: 0x" << std::hex << mPC << " - ";
             std::cout << "Opcode: 0x" << static_cast<int>(instr.opcode) << std::endl;
         }
 
@@ -34,15 +35,15 @@ namespace vm {
     }
 
     void CPU::run() {
-        running = true;
-        while (running) {
+        mRunning = true;
+        while (mRunning) {
             step();
         }
     }
 
     void CPU::fetchInstruction(Instruction& instr) {
         // Lecture de l'instruction depuis la mémoire
-        uint64_t raw_instr = memory->read64(pc);
+        uint64_t raw_instr = mMemory->read64(mPC);
 
         instr.opcode = static_cast<Opcode>((raw_instr >> 56) & 0xFF);
         instr.mode = static_cast<AddressingMode>((raw_instr >> 52) & 0xF);
@@ -50,7 +51,7 @@ namespace vm {
         instr.reg2 = (raw_instr >> 44) & 0xF;
         instr.immediate = raw_instr & 0xFFFFFFFF;
 
-        pc += 8; // Instruction de 64 bits
+        mPC += 8; // Instruction de 64 bits
     }
 
     void CPU::executeInstruction(const Instruction& instr) {
@@ -81,71 +82,71 @@ namespace vm {
 
     void CPU::executeLoad(const Instruction& instr) {
         uint64_t address = getOperandValue(instr, true);
-        uint64_t value = memory->read64(address);
-        registers[instr.reg1] = value;
+        uint64_t value = mMemory->read64(address);
+        mRegisters[instr.reg1] = value;
     }
 
     void CPU::executeStore(const Instruction& instr) {
         uint64_t address = getOperandValue(instr, false);
-        uint64_t value = registers[instr.reg2];
-        memory->write64(address, value);
+        uint64_t value = mRegisters[instr.reg2];
+        mMemory->write64(address, value);
     }
 
     void CPU::executePush(const Instruction& instr) {
         uint64_t value = getOperandValue(instr);
-        sp -= 8;
-        memory->write64(sp, value);
+        mSP -= 8;
+        mMemory->write64(mSP, value);
     }
 
     void CPU::executePop(const Instruction& instr) {
-        uint64_t value = memory->read64(sp);
-        registers[instr.reg1] = value;
-        sp += 8;
+        uint64_t value = mMemory->read64(mSP);
+        mRegisters[instr.reg1] = value;
+        mSP += 8;
     }
 
     void CPU::executeAdd(const Instruction& instr) {
-        uint64_t op1 = registers[instr.reg1];
+        uint64_t op1 = mRegisters[instr.reg1];
         uint64_t op2 = getOperandValue(instr, true);
         uint64_t result = op1 + op2;
 
-        registers[instr.reg1] = result;
+        mRegisters[instr.reg1] = result;
         updateFlags(result, result < op1); // Détection de carry
     }
 
     void CPU::executeSub(const Instruction& instr) {
-        uint64_t op1 = registers[instr.reg1];
+        uint64_t op1 = mRegisters[instr.reg1];
         uint64_t op2 = getOperandValue(instr, true);
         uint64_t result = op1 - op2;
 
-        registers[instr.reg1] = result;
+        mRegisters[instr.reg1] = result;
         updateFlags(result, op1 < op2); // Détection de borrow
     }
 
     void CPU::executeJmp(const Instruction& instr) {
         uint64_t address = getOperandValue(instr);
-        pc = address;
+        mPC = address;
     }
 
     void CPU::executeCall(const Instruction& instr) {
         // Sauvegarder l'adresse de retour
-        sp -= 8;
-        memory->write64(sp, pc);
+        mSP -= 8;
+        mMemory->write64(mSP, mPC);
 
         // Saut vers la fonction
         uint64_t address = getOperandValue(instr);
-        pc = address;
+        mPC = address;
     }
 
     void CPU::executeRet(const Instruction&) {
         // Restaurer l'adresse de retour
-        uint64_t return_address = memory->read64(sp);
-        sp += 8;
-        pc = return_address;
+        uint64_t return_address = mMemory->read64(mSP);
+        mSP += 8;
+        mPC = return_address;
     }
 
     void CPU::executeHlt(const Instruction&) {
-        running = false;
-        if (debug_mode) {
+        mRunning = false;
+        if (mDebug) {
             std::cout << "CPU halted." << std::endl;
         }
     }
@@ -155,13 +156,13 @@ namespace vm {
 
         switch (instr.mode) {
             case AddressingMode::REGISTER:
-                return registers[reg];
+                return mRegisters[reg];
             case AddressingMode::IMMEDIATE:
                 return instr.immediate;
             case AddressingMode::MEMORY:
-                return memory->read64(instr.immediate);
+                return mMemory->read64(instr.immediate);
             case AddressingMode::REGISTER_INDIRECT:
-                return memory->read64(registers[reg]);
+                return mMemory->read64(mRegisters[reg]);
             default:
                 return 0;
         }
@@ -172,13 +173,13 @@ namespace vm {
 
         switch (instr.mode) {
             case AddressingMode::REGISTER:
-                registers[reg] = value;
+                mRegisters[reg] = value;
                 break;
             case AddressingMode::MEMORY:
-                memory->write64(instr.immediate, value);
+                mMemory->write64(instr.immediate, value);
                 break;
             case AddressingMode::REGISTER_INDIRECT:
-                memory->write64(registers[reg], value);
+                mMemory->write64(mRegisters[reg], value);
                 break;
             default:
                 // Mode invalide pour écriture
@@ -189,15 +190,15 @@ namespace vm {
     void CPU::setFlag(FlagType flag, bool value) {
         uint32_t mask = 1 << static_cast<uint8_t>(flag);
         if (value) {
-            flags |= mask;
+            mFlags |= mask;
         } else {
-            flags &= ~mask;
+            mFlags &= ~mask;
         }
     }
 
     bool CPU::getFlag(FlagType flag) const {
         uint32_t mask = 1 << static_cast<uint8_t>(flag);
-        return (flags & mask) != 0;
+        return (mFlags & mask) != 0;
     }
 
     void CPU::updateFlags(uint64_t result, bool carry, bool overflow) {
@@ -209,28 +210,28 @@ namespace vm {
 
     uint64_t CPU::getRegister(uint8_t reg) const {
         if (reg < REGISTER_COUNT) {
-            return registers[reg];
+            return mRegisters[reg];
         }
         return 0;
     }
 
     void CPU::setRegister(uint8_t reg, uint64_t value) {
         if (reg < REGISTER_COUNT) {
-            registers[reg] = value;
+            mRegisters[reg] = value;
         }
     }
 
     void CPU::printState() const {
         std::cout << "\n=== CPU State ===" << std::endl;
-        std::cout << "PC: 0x" << std::hex << std::setfill('0') << std::setw(16) << pc << std::endl;
-        std::cout << "SP: 0x" << std::hex << std::setfill('0') << std::setw(16) << sp << std::endl;
-        std::cout << "Flags: 0x" << std::hex << std::setfill('0') << std::setw(8) << flags << std::endl;
+        std::cout << "PC: 0x" << std::hex << std::setfill('0') << std::setw(16) << mPC << std::endl;
+        std::cout << "SP: 0x" << std::hex << std::setfill('0') << std::setw(16) << mSP << std::endl;
+        std::cout << "Flags: 0x" << std::hex << std::setfill('0') << std::setw(8) << mFlags << std::endl;
 
         std::cout << "Registers:" << std::endl;
         for (size_t i = 0; i < REGISTER_COUNT; ++i) {
             std::cout << "R" << std::dec << i << ": 0x"
                       << std::hex << std::setfill('0') << std::setw(16)
-                      << registers[i] << std::endl;
+                      << mRegisters[i] << std::endl;
         }
         std::cout << "=================" << std::endl;
     }
