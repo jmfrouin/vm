@@ -58,7 +58,8 @@ namespace vm {
     void CPU::Reset() {
         mRegisters.fill(0);
         mPC = 0;
-        mSP = 0xFFFFF0; // Stack starts at top of memory
+        // Adapter le SP à la taille réelle de la mémoire
+        mSP = mMemory->GetSize() - 16; // Laisser 16 octets de marge
         mFlags = 0;
         mRunning = false;
     }
