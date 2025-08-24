@@ -16,35 +16,36 @@ namespace vm {
         bool mDebugMode;
         bool mRunning;
 
-        // Méthodes privées
+        // Private methods
         void InitializeSystem();
         void Shutdown();
 
     public:
-        VirtualMachine(size_t memorySize = 1024 * 1024); // 1MB par défaut
+        VirtualMachine(size_t memorySize = 1024 * 1024); // 1MB by default
         ~VirtualMachine();
 
-        // Gestion du cycle de vie
+        // Lifecycle management
         bool LoadProgram(const std::vector<uint64_t>& program, uint64_t startAddress = 0);
         void Run();
         void Step();
         void Stop();
         void Reset();
 
-        // Accès aux composants
+        // Component access
         Memory& GetMemory() { return *mMemory; }
         const Memory& GetMemory() const { return *mMemory; }
         CPU& GetCPU() { return *mCPU; }
         const CPU& GetCPU() const { return *mCPU; }
 
-        // Debug et monitoring
+        // Debug and monitoring
         void EnableDebugger(bool enable = true) { mDebugMode = enable; }
+        void EnableStepByStep(bool enable = true);
         bool IsDebugging() const { return mDebugMode; }
         bool IsRunning() const { return mRunning; }
         void PrintState() const;
         void DumpMemory(uint64_t start, uint64_t length) const;
 
-        // Utilitaires
+        // Utilities
         void DumpRegisters() const;
         void SetBreakpoint(uint64_t address);
         void RemoveBreakpoint(uint64_t address);

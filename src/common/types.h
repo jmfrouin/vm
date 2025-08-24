@@ -6,11 +6,11 @@
 #include <array>
 
 namespace vm {
-    // Taille des registres
+    // Register sizes
     constexpr size_t REGISTER_COUNT = 16;
     constexpr size_t REGISTER_SIZE = 8; // 64 bits
 
-    // Types de drapeaux CPU
+    // CPU flag types
     enum class FlagType : uint8_t {
         ZERO = 0,
         CARRY = 1,
@@ -19,23 +19,23 @@ namespace vm {
         INTERRUPT = 4
     };
 
-    // Types d'accès mémoire
+    // Memory access types
     enum class AccessType : uint8_t {
         READ = 1,
         WRITE = 2,
         EXECUTE = 4
     };
 
-    // Opcodes des instructions
+    // Instruction opcodes
     enum class Opcode : uint8_t {
-        // Instructions de données
+        // Data instructions
         MOV = 0x01,
         LOAD = 0x02,
         STORE = 0x03,
         PUSH = 0x04,
         POP = 0x05,
 
-        // Instructions arithmétiques
+        // Arithmetic instructions
         ADD = 0x10,
         SUB = 0x11,
         MUL = 0x12,
@@ -45,7 +45,7 @@ namespace vm {
         DEC = 0x16,
         CMP = 0x17,
 
-        // Instructions logiques
+        // Logical instructions
         AND = 0x20,
         OR = 0x21,
         XOR = 0x22,
@@ -53,7 +53,7 @@ namespace vm {
         SHL = 0x24,
         SHR = 0x25,
 
-        // Instructions de contrôle
+        // Control instructions
         JMP = 0x30,
         JZ = 0x31,
         JNZ = 0x32,
@@ -63,14 +63,14 @@ namespace vm {
         RET = 0x36,
         NOP = 0x37,
 
-        // Instructions système
+        // System instructions
         INT = 0x40,
         HLT = 0x41,
         IN = 0x42,
         OUT = 0x43
     };
 
-    // Mode d'adressage
+    // Addressing mode
     enum class AddressingMode : uint8_t {
         REGISTER = 0,
         IMMEDIATE = 1,
@@ -78,7 +78,7 @@ namespace vm {
         REGISTER_INDIRECT = 3
     };
 
-    // Structure d'une instruction
+    // Instruction structure
     struct Instruction {
         Opcode opcode;
         AddressingMode mode;

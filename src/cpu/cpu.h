@@ -12,17 +12,20 @@ namespace vm {
         std::array<uint64_t, REGISTER_COUNT> mRegisters;
         uint64_t mPC;        // Program Counter
         uint64_t mSP;        // Stack Pointer
-        uint32_t mFlags;     // Registre de drapeaux
+        uint32_t mFlags;     // Flags register
         Memory* mMemory;
         bool mRunning;
         bool mDebug;
+        bool mStepByStep;    // Step-by-step mode
 
-        // Méthodes privées
+        // Private methods
         void FetchInstruction(Instruction& instr);
         void DecodeInstruction(const Instruction& instr);
         void ExecuteInstruction(const Instruction& instr);
+        void WaitForKey() const; // Wait for key press
+        void ClearScreen() const; // Clear screen
 
-        // Instructions spécifiques
+        // Specific instructions
         void ExecuteMov(const Instruction& instr);
         void ExecuteLoad(const Instruction& instr);
         void ExecuteStore(const Instruction& instr);
@@ -43,20 +46,20 @@ namespace vm {
         ~CPU() = default;
 
         void Reset();
-        void Step();            // Exécute une instruction
-        void Run();             // Boucle d'exécution
+        void Step();            // Execute one instruction
+        void Run();             // Execution loop
         void Halt() { mRunning = false; }
         bool IsRunning() const { return mRunning; }
 
-        // Gestion des interruptions
+        // Interrupt management
         void HandleInterrupt(int num);
 
-        // Gestion des drapeaux
+        // Flag management
         void SetFlag(FlagType flag, bool value);
         bool GetFlag(FlagType flag) const;
         void UpdateFlags(uint64_t result, bool carry = false, bool overflow = false);
 
-        // Accès aux registres
+        // Register access
         uint64_t GetRegister(uint8_t reg) const;
         void SetRegister(uint8_t reg, uint64_t value);
         uint64_t GetPC() const { return mPC; }
@@ -66,6 +69,7 @@ namespace vm {
 
         // Debug
         void EnableDebug(bool enable = true) { mDebug = enable; }
+        void EnableStepByStep(bool enable = true) { mStepByStep = enable; }
         void PrintState() const;
     };
 }

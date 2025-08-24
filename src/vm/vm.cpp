@@ -37,6 +37,12 @@ namespace vm {
         }
     }
 
+    void VirtualMachine::EnableStepByStep(bool enable) {
+        if (mCPU) {
+            mCPU->EnableStepByStep(enable);
+        }
+    }
+
     bool VirtualMachine::LoadProgram(const std::vector<uint64_t>& program, uint64_t startAddress) {
         if (program.empty()) {
             if (mDebugMode) {

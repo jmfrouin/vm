@@ -49,6 +49,7 @@ void runDemo() {
     // Create VM with 1MB of RAM
     vm::VirtualMachine vm(1024 * 1024);
     vm.EnableDebugger(true);
+    vm.EnableStepByStep(true); // Enable step-by-step mode
 
     std::vector<uint64_t> program = createTestProgram();
 
@@ -79,6 +80,7 @@ void runFirmware(const std::string& filename) {
     // Create VM with 1MB of RAM
     vm::VirtualMachine vm(1024 * 1024);
     vm.EnableDebugger(true);
+    vm.EnableStepByStep(true); // Enable step-by-step mode
 
     // Load firmware
     std::vector<uint64_t> instructions;
