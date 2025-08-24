@@ -6,6 +6,7 @@
 #include "memory.h"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <stdexcept>
 
 namespace vm {
@@ -47,7 +48,9 @@ namespace vm {
 
     uint8_t Memory::Read8(uint64_t addr) {
         if (!IsValidAddress(addr)) {
-            throw std::runtime_error("Invalid memory address: 0x" + std::to_string(addr));
+            std::stringstream temp;
+            temp << "Invalid memory address: 0x" << std::hex << addr;
+            throw std::runtime_error(temp.str());
         }
         if (!CheckAccess(addr, AccessType::READ)) {
             throw std::runtime_error("Memory access violation (read) at: 0x" + std::to_string(addr));
@@ -72,7 +75,9 @@ namespace vm {
 
     void Memory::Write8(uint64_t addr, uint8_t value) {
         if (!IsValidAddress(addr)) {
-            throw std::runtime_error("Invalid memory address: 0x" + std::to_string(addr));
+            std::stringstream temp;
+            temp << "Invalid memory address: 0x" << std::hex << addr;
+            throw std::runtime_error(temp.str());
         }
         if (!CheckAccess(addr, AccessType::WRITE)) {
             throw std::runtime_error("Memory access violation (write) at: 0x" + std::to_string(addr));

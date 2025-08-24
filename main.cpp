@@ -65,7 +65,7 @@ void runDemo() {
         vm.PrintState();
 
         std::cout << "\nMemory dump (stack):" << std::endl;
-        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 64);
+        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 128);
 
         std::cout << "\nExpected result: R2 = 52 (42 + 10)" << std::endl;
         std::cout << "Actual result: R2 = " << std::dec
@@ -101,7 +101,7 @@ void runFirmware(const std::string& filename) {
         vm.PrintState();
 
         std::cout << "\nMemory dump (stack):" << std::endl;
-        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 64);
+        vm.DumpMemory(vm.GetMemory().GetSize() - 0x100, 128);
     }
 }
 

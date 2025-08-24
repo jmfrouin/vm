@@ -73,7 +73,6 @@ namespace vm {
 
     void CPU::WaitForKey() const {
         std::cout << "\n📝 Press Enter to continue...";
-        std::cin.ignore();
         std::cin.get();
     }
 
@@ -262,6 +261,9 @@ namespace vm {
                 break;
             case AddressingMode::REGISTER_INDIRECT:
                 mMemory->Write64(mRegisters[reg], value);
+                break;
+            case AddressingMode::IMMEDIATE:
+                mRegisters[instr.reg1] = value;
                 break;
             default:
                 // Invalid mode for writing
