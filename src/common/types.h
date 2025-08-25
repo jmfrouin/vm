@@ -1,4 +1,7 @@
-// src/common/types.h
+//
+// Created by Jean-Michel Frouin on 17/08/2025.
+//
+
 #ifndef VM_TYPES_H
 #define VM_TYPES_H
 
@@ -57,11 +60,13 @@ namespace vm {
         JMP = 0x30,
         JZ = 0x31,
         JNZ = 0x32,
-        JC = 0x33,
-        JNC = 0x34,
-        CALL = 0x35,
-        RET = 0x36,
-        NOP = 0x37,
+        JEQ = 0x33,    // Jump if Equal (alias for JZ)
+        JNE = 0x34,    // Jump if Not Equal (alias for JNZ)
+        JC = 0x35,
+        JNC = 0x36,
+        CALL = 0x37,
+        RET = 0x38,
+        NOP = 0x39,
 
         // System instructions
         INT = 0x40,

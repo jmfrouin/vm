@@ -1,4 +1,6 @@
-// src/vm/firmware_loader.cpp
+//
+// Created by Jean-Michel Frouin on 17/08/2025.
+//
 #include "firmware_loader.h"
 #include <fstream>
 #include <iostream>

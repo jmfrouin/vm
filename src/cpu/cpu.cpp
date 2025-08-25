@@ -1,7 +1,6 @@
 //
 // Created by Jean-Michel Frouin on 17/08/2025.
 //
-// src/cpu/cpu.cpp
 
 #include "cpu.h"
 #include <iostream>
@@ -38,6 +37,8 @@ namespace vm {
             case Opcode::JMP:   return "JMP";
             case Opcode::JZ:    return "JZ";
             case Opcode::JNZ:   return "JNZ";
+            case Opcode::JEQ:   return "JEQ";
+            case Opcode::JNE:   return "JNE";
             case Opcode::JC:    return "JC";
             case Opcode::JNC:   return "JNC";
             case Opcode::CALL:  return "CALL";
@@ -145,7 +146,12 @@ namespace vm {
             case Opcode::POP:   ExecutePop(instr); break;
             case Opcode::ADD:   ExecuteAdd(instr); break;
             case Opcode::SUB:   ExecuteSub(instr); break;
+            case Opcode::CMP:   ExecuteCmp(instr); break;
             case Opcode::JMP:   ExecuteJmp(instr); break;
+            case Opcode::JZ:    ExecuteJz(instr); break;
+            case Opcode::JNZ:   ExecuteJnz(instr); break;
+            case Opcode::JEQ:   ExecuteJeq(instr); break;
+            case Opcode::JNE:   ExecuteJne(instr); break;
             case Opcode::CALL:  ExecuteCall(instr); break;
             case Opcode::RET:   ExecuteRet(instr); break;
             case Opcode::HLT:   ExecuteHlt(instr); break;
@@ -204,9 +210,78 @@ namespace vm {
         UpdateFlags(result, op1 < op2); // Borrow detection
     }
 
+    void CPU::ExecuteCmp(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+        uint64_t result = op1 - op2;
+
+        // CMP ne modifie pas les registres, seulement les flags
+        UpdateFlags(result, op1 < op2); // Mise à jour des flags selon le résultat de la soustraction
+        
+        if (mDebug) {
+            std::cout << "🔍 CMP R" << static_cast<int>(instr.reg1) 
+                      << " (0x" << std::hex << op1 << ") with 0x" << op2
+                      << " → flags: Z=" << GetFlag(FlagType::ZERO) 
+                      << " C=" << GetFlag(FlagType::CARRY) 
+                      << " N=" << GetFlag(FlagType::NEGATIVE) << std::endl;
+        }
+    }
+
     void CPU::ExecuteJmp(const Instruction& instr) {
         uint64_t address = GetOperandValue(instr);
         mPC = address;
+        
+        if (mDebug) {
+            std::cout << "🚀 JMP to address 0x" << std::hex << address << std::endl;
+        }
+    }
+
+    void CPU::ExecuteJz(const Instruction& instr) {
+        if (GetFlag(FlagType::ZERO)) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+            
+            if (mDebug) {
+                std::cout << "✅ JZ taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JZ not taken (ZERO flag not set)" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJnz(const Instruction& instr) {
+        if (!GetFlag(FlagType::ZERO)) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+            
+            if (mDebug) {
+                std::cout << "✅ JNZ taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JNZ not taken (ZERO flag is set)" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJeq(const Instruction& instr) {
+        // JEQ est équivalent à JZ (sauter si égal = sauter si zéro)
+        ExecuteJz(instr);
+        
+        if (mDebug) {
+            std::cout << "🎯 JEQ = JZ (jump if equal)" << std::endl;
+        }
+    }
+
+    void CPU::ExecuteJne(const Instruction& instr) {
+        // JNE est équivalent à JNZ (sauter si pas égal = sauter si pas zéro)
+        ExecuteJnz(instr);
+        
+        if (mDebug) {
+            std::cout << "🎯 JNE = JNZ (jump if not equal)" << std::endl;
+        }
     }
 
     void CPU::ExecuteCall(const Instruction& instr) {
@@ -217,6 +292,10 @@ namespace vm {
         // Jump to function
         uint64_t address = GetOperandValue(instr);
         mPC = address;
+        
+        if (mDebug) {
+            std::cout << "📞 CALL to address 0x" << std::hex << address << std::endl;
+        }
     }
 
     void CPU::ExecuteRet(const Instruction&) {
@@ -224,6 +303,10 @@ namespace vm {
         uint64_t return_address = mMemory->Read64(mSP);
         mSP += 8;
         mPC = return_address;
+        
+        if (mDebug) {
+            std::cout << "🔙 RET to address 0x" << std::hex << return_address << std::endl;
+        }
     }
 
     void CPU::ExecuteHlt(const Instruction&) {
@@ -311,6 +394,10 @@ namespace vm {
         std::cout << "│ PC: 0x" << std::hex << std::setfill('0') << std::setw(16) << mPC << " │" << std::endl;
         std::cout << "│ SP: 0x" << std::hex << std::setfill('0') << std::setw(16) << mSP << " │" << std::endl;
         std::cout << "│ Flags: 0x" << std::hex << std::setfill('0') << std::setw(8) << mFlags << "     │" << std::endl;
+        std::cout << "│ Z:" << (GetFlag(FlagType::ZERO) ? "1" : "0") 
+                  << " C:" << (GetFlag(FlagType::CARRY) ? "1" : "0")
+                  << " N:" << (GetFlag(FlagType::NEGATIVE) ? "1" : "0")
+                  << " O:" << (GetFlag(FlagType::OF) ? "1" : "0") << "           │" << std::endl;
         std::cout << "└─────────────────┘" << std::endl;
 
         std::cout << "\n📋 Registers:" << std::endl;

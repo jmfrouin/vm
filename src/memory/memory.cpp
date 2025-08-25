@@ -2,7 +2,6 @@
 // Created by Jean-Michel Frouin on 17/08/2025.
 //
 
-// src/memory/memory.cpp
 #include "memory.h"
 #include <iostream>
 #include <iomanip>

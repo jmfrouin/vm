@@ -303,6 +303,38 @@ std::vector<uint64_t> createStackBenchmark() {
     };
 }
 
+std::vector<uint64_t> createConditionalJumpProgram() {
+    return {
+        // Test JEQ/JNE avec CMP
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 0, 0, 10),  // R0 = 10
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 1, 0, 10),  // R1 = 10
+
+        // Test égalité
+        makeInstruction(vm::Opcode::CMP, vm::AddressingMode::REGISTER, 0, 1, 0),    // Compare R0 et R1
+        makeInstruction(vm::Opcode::JEQ, vm::AddressingMode::IMMEDIATE, 0, 0, 0x40), // Saut si égaux
+
+        // Cette instruction ne devrait pas s'exécuter
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 2, 0, 999), // R2 = 999 (erreur)
+        makeInstruction(vm::Opcode::JMP, vm::AddressingMode::IMMEDIATE, 0, 0, 0x60), // Aller à la fin
+
+        // Point de saut pour égalité (0x40)
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 2, 0, 42),  // R2 = 42 (succès)
+
+        // Test inégalité (0x60)
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 3, 0, 5),   // R3 = 5
+        makeInstruction(vm::Opcode::CMP, vm::AddressingMode::REGISTER, 0, 3, 0),    // Compare R0 et R3
+        makeInstruction(vm::Opcode::JNE, vm::AddressingMode::IMMEDIATE, 0, 0, 0x80), // Saut si différents
+
+        // Cette instruction ne devrait pas s'exécuter
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 4, 0, 888), // R4 = 888 (erreur)
+        makeInstruction(vm::Opcode::HLT, vm::AddressingMode::REGISTER, 0, 0, 0),
+
+        // Point de saut pour inégalité (0x80)
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 4, 0, 84),  // R4 = 84 (succès)
+        makeInstruction(vm::Opcode::HLT, vm::AddressingMode::REGISTER, 0, 0, 0)
+    };
+}
+
 // Collection de programmes de test avancés
 std::vector<TestProgram> getAdvancedTestPrograms() {
     return {
@@ -347,6 +379,12 @@ std::vector<TestProgram> getAdvancedTestPrograms() {
             "Conditional logic and comparison operations",
             "conditional_logic.vmfw",
             []() { return createConditionalProgram(); }
+        },
+        {
+        "conditional_jumps",
+        "Conditional jumps with JEQ/JNE instructions",
+        "conditional_jumps.vmfw",
+        []() { return createConditionalJumpProgram(); }
         },
         {
             "loop_demo",

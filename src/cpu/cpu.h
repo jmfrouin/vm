@@ -1,4 +1,7 @@
-// src/cpu/cpu.h
+//
+// Created by Jean-Michel Frouin on 17/08/2025.
+//
+
 #ifndef VM_CPU_H
 #define VM_CPU_H
 
@@ -33,7 +36,12 @@ namespace vm {
         void ExecutePop(const Instruction& instr);
         void ExecuteAdd(const Instruction& instr);
         void ExecuteSub(const Instruction& instr);
+        void ExecuteCmp(const Instruction& instr);
         void ExecuteJmp(const Instruction& instr);
+        void ExecuteJz(const Instruction& instr);
+        void ExecuteJnz(const Instruction& instr);
+        void ExecuteJeq(const Instruction& instr);
+        void ExecuteJne(const Instruction& instr);
         void ExecuteCall(const Instruction& instr);
         void ExecuteRet(const Instruction& instr);
         void ExecuteHlt(const Instruction& instr);

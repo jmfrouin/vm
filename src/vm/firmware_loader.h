@@ -1,4 +1,6 @@
-// src/vm/firmware_loader.h
+//
+// Created by Jean-Michel Frouin on 17/08/2025.
+//
 #ifndef VM_FIRMWARE_LOADER_H
 #define VM_FIRMWARE_LOADER_H
 

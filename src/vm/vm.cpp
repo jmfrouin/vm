@@ -1,4 +1,7 @@
-// src/vm/vm.cpp
+//
+// Created by Jean-Michel Frouin on 17/08/2025.
+//
+
 #include "vm.h"
 #include <iostream>
 #include <iomanip>
