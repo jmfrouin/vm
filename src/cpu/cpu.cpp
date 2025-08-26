@@ -155,6 +155,9 @@ namespace vm {
             case Opcode::CALL:  ExecuteCall(instr); break;
             case Opcode::RET:   ExecuteRet(instr); break;
             case Opcode::HLT:   ExecuteHlt(instr); break;
+            case Opcode::INC:   ExecuteInc(instr); break;
+            case Opcode::DEC:   ExecuteDec(instr); break;
+
             case Opcode::NOP:   break; // Do nothing
             default:
                 std::cerr << "❌ Unimplemented instruction: " << OpcodeToString(instr.opcode)
@@ -315,6 +318,33 @@ namespace vm {
             std::cout << "\n🛑 CPU STOPPED (HLT)" << std::endl;
         }
     }
+
+    void CPU::ExecuteInc(const Instruction& instr) {
+        uint64_t value = mRegisters[instr.reg1];
+        uint64_t result = value + 1;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result, result < value); // Détection de carry
+
+        if (mDebug) {
+            std::cout << "⬆️ INC R" << static_cast<int>(instr.reg1)
+                      << ": 0x" << std::hex << value << " → 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteDec(const Instruction& instr) {
+        uint64_t value = mRegisters[instr.reg1];
+        uint64_t result = value - 1;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result, value == 0); // Détection de borrow
+
+        if (mDebug) {
+            std::cout << "⬇️ DEC R" << static_cast<int>(instr.reg1)
+                      << ": 0x" << std::hex << value << " → 0x" << result << std::endl;
+        }
+    }
+
 
     uint64_t CPU::GetOperandValue(const Instruction& instr, bool isSecondOperand) {
         uint8_t reg = isSecondOperand ? instr.reg2 : instr.reg1;

@@ -335,6 +335,18 @@ std::vector<uint64_t> createConditionalJumpProgram() {
     };
 }
 
+std::vector<uint64_t> createIncDecProgram() {
+    return {
+        makeInstruction(vm::Opcode::MOV, vm::AddressingMode::IMMEDIATE, 0, 0, 5),  // R0 = 5
+        makeInstruction(vm::Opcode::INC, vm::AddressingMode::REGISTER, 0, 0, 0),   // R0++ (=6)
+        makeInstruction(vm::Opcode::INC, vm::AddressingMode::REGISTER, 0, 0, 0),   // R0++ (=7)
+        makeInstruction(vm::Opcode::DEC, vm::AddressingMode::REGISTER, 0, 0, 0),   // R0-- (=6)
+        makeInstruction(vm::Opcode::PUSH, vm::AddressingMode::REGISTER, 0, 0, 0),  // Sauver R0
+        makeInstruction(vm::Opcode::HLT, vm::AddressingMode::REGISTER, 0, 0, 0)
+    };
+}
+
+
 // Collection de programmes de test avancés
 std::vector<TestProgram> getAdvancedTestPrograms() {
     return {

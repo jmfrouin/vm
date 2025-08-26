@@ -45,6 +45,26 @@ namespace vm {
         void ExecuteCall(const Instruction& instr);
         void ExecuteRet(const Instruction& instr);
         void ExecuteHlt(const Instruction& instr);
+        void ExecuteInc(const Instruction& instr);
+        void ExecuteDec(const Instruction& instr);
+        void ExecuteMul(const Instruction& instr);
+        void ExecuteDiv(const Instruction& instr);
+        void ExecuteMod(const Instruction& instr);
+        void ExecuteAnd(const Instruction& instr);
+        void ExecuteOr(const Instruction& instr);
+        void ExecuteXor(const Instruction& instr);
+        void ExecuteNot(const Instruction& instr);
+        void ExecuteShl(const Instruction& instr);
+        void ExecuteShr(const Instruction& instr);
+        void ExecuteJc(const Instruction& instr);
+        void ExecuteJnc(const Instruction& instr);
+        void ExecuteIn(const Instruction& instr);
+        void ExecuteOut(const Instruction& instr);
+        void ExecutePrint(const Instruction& instr);
+        void ExecuteSwap(const Instruction& instr);
+        void ExecuteLoop(const Instruction& instr);
+
+
 
         uint64_t GetOperandValue(const Instruction& instr, bool isSecondOperand = false);
         void SetOperandValue(const Instruction& instr, uint64_t value, bool isSecondOperand = false);

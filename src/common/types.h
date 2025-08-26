@@ -47,6 +47,7 @@ namespace vm {
         INC = 0x15,
         DEC = 0x16,
         CMP = 0x17,
+        SWAP = 0x18, //Swap 2 registers
 
         // Logical instructions
         AND = 0x20,
@@ -68,11 +69,14 @@ namespace vm {
         RET = 0x38,
         NOP = 0x39,
 
-        // System instructions
-        INT = 0x40,
-        HLT = 0x41,
-        IN = 0x42,
-        OUT = 0x43
+        JL   = 0x3A,  // Jump if Less
+        JLE  = 0x3B,  // Jump if Less or Equal
+        JG   = 0x3C,  // Jump if Greater
+        JGE  = 0x3D,  // Jump if Greater or Equal
+        LOOP = 0x3E,
+
+        PRINT = 0x44,  // Afficher une valeur
+
     };
 
     // Addressing mode
