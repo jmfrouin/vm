@@ -44,10 +44,6 @@ namespace vm {
             case Opcode::CALL:  return "CALL";
             case Opcode::RET:   return "RET";
             case Opcode::NOP:   return "NOP";
-            case Opcode::INT:   return "INT";
-            case Opcode::HLT:   return "HLT";
-            case Opcode::IN:    return "IN";
-            case Opcode::OUT:   return "OUT";
             default:            return "UNKNOWN";
         }
     }
@@ -157,6 +153,9 @@ namespace vm {
             case Opcode::HLT:   ExecuteHlt(instr); break;
             case Opcode::INC:   ExecuteInc(instr); break;
             case Opcode::DEC:   ExecuteDec(instr); break;
+            case Opcode::MUL:   ExecuteMul(instr); break;
+            case Opcode::DIV:   ExecuteDiv(instr); break;
+            case Opcode::MOD:   ExecuteMod(instr); break;
 
             case Opcode::NOP:   break; // Do nothing
             default:
@@ -342,6 +341,78 @@ namespace vm {
         if (mDebug) {
             std::cout << "⬇️ DEC R" << static_cast<int>(instr.reg1)
                       << ": 0x" << std::hex << value << " → 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteMul(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+
+        // Détection d'overflow pour la multiplication
+        uint64_t result = op1 * op2;
+        bool overflow = (op2 != 0) && (result / op2 != op1);
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result, false, overflow);
+
+        if (mDebug) {
+            std::cout << "✖️ MUL R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") * 0x" << op2
+                      << " = 0x" << result;
+            if (overflow) std::cout << " [OVERFLOW!]";
+            std::cout << std::endl;
+        }
+    }
+
+    void CPU::ExecuteDiv(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+
+        // Protection contre division par zéro
+        if (op2 == 0) {
+            if (mDebug) {
+                std::cerr << "⚠️ DIV: Division by zero! R" << static_cast<int>(instr.reg1)
+                          << " (0x" << std::hex << op1 << ") / 0" << std::endl;
+            }
+            // Comportement en cas de division par zéro : arrêter la VM
+            Halt();
+            return;
+        }
+
+        uint64_t result = op1 / op2;
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "➗ DIV R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") / 0x" << op2
+                      << " = 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteMod(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+
+        // Protection contre modulo par zéro
+        if (op2 == 0) {
+            if (mDebug) {
+                std::cerr << "⚠️ MOD: Modulo by zero! R" << static_cast<int>(instr.reg1)
+                          << " (0x" << std::hex << op1 << ") % 0" << std::endl;
+            }
+            // Comportement en cas de modulo par zéro : arrêter la VM
+            Halt();
+            return;
+        }
+
+        uint64_t result = op1 % op2;
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "🔢 MOD R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") % 0x" << op2
+                      << " = 0x" << result << std::endl;
         }
     }
 

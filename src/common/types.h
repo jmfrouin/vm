@@ -37,6 +37,7 @@ namespace vm {
         STORE = 0x03,
         PUSH = 0x04,
         POP = 0x05,
+        HLT = 0x06,
 
         // Arithmetic instructions
         ADD = 0x10,
