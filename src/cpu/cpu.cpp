@@ -70,8 +70,7 @@ namespace vm {
     void CPU::Reset() {
         mRegisters.fill(0);
         mPC = 0;
-        // Adapter le SP à la taille réelle de la mémoire
-        mSP = mMemory->GetSize() - 16; // Laisser 16 octets de marge
+        mSP = mMemory->GetSize() - 16;
         mFlags = 0;
         mRunning = false;
     }
@@ -104,9 +103,9 @@ namespace vm {
             std::cout << "║                    EXECUTION STEP                          ║" << std::endl;
             std::cout << "╚════════════════════════════════════════════════════════════╝" << std::endl;
             
-            std::cout << "📍 PC: 0x" << std::hex << std::setfill('0') << std::setw(16) << (mPC - 8) << " ";
-            std::cout << "📦 SP: 0x" << std::hex << std::setfill('0') << std::setw(16) << mSP << std::endl;
-            std::cout << "🔧 Instruction: " << OpcodeToString(instr.opcode) 
+            std::cout << "PC: 0x" << std::hex << std::setfill('0') << std::setw(16) << (mPC - 8) << " ";
+            std::cout << "SP: 0x" << std::hex << std::setfill('0') << std::setw(16) << mSP << std::endl;
+            std::cout << "Instruction: " << OpcodeToString(instr.opcode)
                       << " (0x" << std::hex << std::setfill('0') << std::setw(2) 
                       << static_cast<int>(instr.opcode) << ")" << std::endl;
             
@@ -195,7 +194,7 @@ namespace vm {
             case Opcode::OUT:   ExecuteOut(instr); break;
             case Opcode::NOP:   break; // Do nothing
             default:
-                std::cerr << "❌ Unimplemented instruction: " << OpcodeToString(instr.opcode)
+                std::cerr << "[ERROR] Unimplemented instruction: " << OpcodeToString(instr.opcode)
                          << " (0x" << std::hex << static_cast<int>(instr.opcode) << ")" << std::endl;
                 Halt();
         }
@@ -253,11 +252,10 @@ namespace vm {
         uint64_t op2 = GetOperandValue(instr, true);
         uint64_t result = op1 - op2;
 
-        // CMP ne modifie pas les registres, seulement les flags
-        UpdateFlags(result, op1 < op2); // Mise à jour des flags selon le résultat de la soustraction
+        UpdateFlags(result, op1 < op2);
         
         if (mDebug) {
-            std::cout << "🔍 CMP R" << static_cast<int>(instr.reg1) 
+            std::cout << "CMP R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") with 0x" << op2
                       << " → flags: Z=" << GetFlag(FlagType::ZERO) 
                       << " C=" << GetFlag(FlagType::CARRY) 
@@ -270,7 +268,7 @@ namespace vm {
         mPC = address;
         
         if (mDebug) {
-            std::cout << "🚀 JMP to address 0x" << std::hex << address << std::endl;
+            std::cout << "JMP to address 0x" << std::hex << address << std::endl;
         }
     }
 
@@ -280,11 +278,11 @@ namespace vm {
             mPC = address;
             
             if (mDebug) {
-                std::cout << "✅ JZ taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JZ taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JZ not taken (ZERO flag not set)" << std::endl;
+                std::cout << "JZ not taken (ZERO flag not set)" << std::endl;
             }
         }
     }
@@ -295,30 +293,28 @@ namespace vm {
             mPC = address;
             
             if (mDebug) {
-                std::cout << "✅ JNZ taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JNZ taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JNZ not taken (ZERO flag is set)" << std::endl;
+                std::cout << "JNZ not taken (ZERO flag is set)" << std::endl;
             }
         }
     }
 
     void CPU::ExecuteJeq(const Instruction& instr) {
-        // JEQ est équivalent à JZ (sauter si égal = sauter si zéro)
         ExecuteJz(instr);
         
         if (mDebug) {
-            std::cout << "🎯 JEQ = JZ (jump if equal)" << std::endl;
+            std::cout << "JEQ = JZ (jump if equal)" << std::endl;
         }
     }
 
     void CPU::ExecuteJne(const Instruction& instr) {
-        // JNE est équivalent à JNZ (sauter si pas égal = sauter si pas zéro)
         ExecuteJnz(instr);
         
         if (mDebug) {
-            std::cout << "🎯 JNE = JNZ (jump if not equal)" << std::endl;
+            std::cout << "JNE = JNZ (jump if not equal)" << std::endl;
         }
     }
 
@@ -332,7 +328,7 @@ namespace vm {
         mPC = address;
         
         if (mDebug) {
-            std::cout << "📞 CALL to address 0x" << std::hex << address << std::endl;
+            std::cout << "CALL to address 0x" << std::hex << address << std::endl;
         }
     }
 
@@ -350,7 +346,7 @@ namespace vm {
     void CPU::ExecuteHlt(const Instruction&) {
         mRunning = false;
         if (mDebug) {
-            std::cout << "\n🛑 CPU STOPPED (HLT)" << std::endl;
+            std::cout << "\nCPU STOPPED (HLT)" << std::endl;
         }
     }
 
@@ -362,7 +358,7 @@ namespace vm {
         UpdateFlags(result, result < value); // Détection de carry
 
         if (mDebug) {
-            std::cout << "⬆️ INC R" << static_cast<int>(instr.reg1)
+            std::cout << "INC R" << static_cast<int>(instr.reg1)
                       << ": 0x" << std::hex << value << " → 0x" << result << std::endl;
         }
     }
@@ -375,7 +371,7 @@ namespace vm {
         UpdateFlags(result, value == 0); // Détection de borrow
 
         if (mDebug) {
-            std::cout << "⬇️ DEC R" << static_cast<int>(instr.reg1)
+            std::cout << "DEC R" << static_cast<int>(instr.reg1)
                       << ": 0x" << std::hex << value << " → 0x" << result << std::endl;
         }
     }
@@ -384,7 +380,6 @@ namespace vm {
         uint64_t op1 = mRegisters[instr.reg1];
         uint64_t op2 = GetOperandValue(instr, true);
 
-        // Détection d'overflow pour la multiplication
         uint64_t result = op1 * op2;
         bool overflow = (op2 != 0) && (result / op2 != op1);
 
@@ -392,7 +387,7 @@ namespace vm {
         UpdateFlags(result, false, overflow);
 
         if (mDebug) {
-            std::cout << "✖️ MUL R" << static_cast<int>(instr.reg1)
+            std::cout << "MUL R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") * 0x" << op2
                       << " = 0x" << result;
             if (overflow) std::cout << " [OVERFLOW!]";
@@ -404,13 +399,11 @@ namespace vm {
         uint64_t op1 = mRegisters[instr.reg1];
         uint64_t op2 = GetOperandValue(instr, true);
 
-        // Protection contre division par zéro
         if (op2 == 0) {
             if (mDebug) {
-                std::cerr << "⚠️ DIV: Division by zero! R" << static_cast<int>(instr.reg1)
+                std::cerr << "DIV: Division by zero! R" << static_cast<int>(instr.reg1)
                           << " (0x" << std::hex << op1 << ") / 0" << std::endl;
             }
-            // Comportement en cas de division par zéro : arrêter la VM
             Halt();
             return;
         }
@@ -420,7 +413,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "➗ DIV R" << static_cast<int>(instr.reg1)
+            std::cout << "DIV R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") / 0x" << op2
                       << " = 0x" << result << std::endl;
         }
@@ -430,13 +423,11 @@ namespace vm {
         uint64_t op1 = mRegisters[instr.reg1];
         uint64_t op2 = GetOperandValue(instr, true);
 
-        // Protection contre modulo par zéro
         if (op2 == 0) {
             if (mDebug) {
-                std::cerr << "⚠️ MOD: Modulo by zero! R" << static_cast<int>(instr.reg1)
+                std::cerr << "MOD: Modulo by zero! R" << static_cast<int>(instr.reg1)
                           << " (0x" << std::hex << op1 << ") % 0" << std::endl;
             }
-            // Comportement en cas de modulo par zéro : arrêter la VM
             Halt();
             return;
         }
@@ -446,7 +437,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "🔢 MOD R" << static_cast<int>(instr.reg1)
+            std::cout << "MOD R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") % 0x" << op2
                       << " = 0x" << result << std::endl;
         }
@@ -479,7 +470,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "🔗 AND R" << static_cast<int>(instr.reg1)
+            std::cout << "AND R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") & 0x" << op2
                       << " = 0x" << result << std::endl;
         }
@@ -494,7 +485,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "🔀 OR R" << static_cast<int>(instr.reg1)
+            std::cout << "OR R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") | 0x" << op2
                       << " = 0x" << result << std::endl;
         }
@@ -509,7 +500,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "⚡ XOR R" << static_cast<int>(instr.reg1)
+            std::cout << "XOR R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") ^ 0x" << op2
                       << " = 0x" << result << std::endl;
         }
@@ -523,7 +514,7 @@ namespace vm {
         UpdateFlags(result);
 
         if (mDebug) {
-            std::cout << "🚫 NOT R" << static_cast<int>(instr.reg1)
+            std::cout << "NOT R" << static_cast<int>(instr.reg1)
                       << " (~0x" << std::hex << value << ") = 0x" << result << std::endl;
         }
     }
@@ -533,14 +524,13 @@ namespace vm {
         uint64_t shift_amount = GetOperandValue(instr, true) & 0x3F; // Limiter à 63
         uint64_t result = op1 << shift_amount;
 
-        // Carry flag = dernier bit décalé
         bool carry = shift_amount > 0 ? (op1 >> (64 - shift_amount)) & 1 : false;
 
         mRegisters[instr.reg1] = result;
         UpdateFlags(result, carry);
 
         if (mDebug) {
-            std::cout << "⬅️ SHL R" << static_cast<int>(instr.reg1)
+            std::cout << "SHL R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") << " << std::dec << shift_amount
                       << " = 0x" << std::hex << result << std::endl;
         }
@@ -551,14 +541,13 @@ namespace vm {
         uint64_t shift_amount = GetOperandValue(instr, true) & 0x3F; // Limiter à 63
         uint64_t result = op1 >> shift_amount;
 
-        // Carry flag = dernier bit décalé
         bool carry = shift_amount > 0 ? (op1 >> (shift_amount - 1)) & 1 : false;
 
         mRegisters[instr.reg1] = result;
         UpdateFlags(result, carry);
 
         if (mDebug) {
-            std::cout << "➡️ SHR R" << static_cast<int>(instr.reg1)
+            std::cout << "SHR R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << op1 << ") >> " << std::dec << shift_amount
                       << " = 0x" << std::hex << result << std::endl;
         }
@@ -570,11 +559,11 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JC taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JC taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JC not taken (CARRY flag not set)" << std::endl;
+                std::cout << "JC not taken (CARRY flag not set)" << std::endl;
             }
         }
     }
@@ -585,18 +574,16 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JNC taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JNC taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JNC not taken (CARRY flag is set)" << std::endl;
+                std::cout << "JNC not taken (CARRY flag is set)" << std::endl;
             }
         }
     }
 
     void CPU::ExecuteJl(const Instruction& instr) {
-        // JL: sauter si moins (signed comparison)
-        // Condition: NEGATIVE != OVERFLOW
         bool condition = GetFlag(FlagType::NEGATIVE) != GetFlag(FlagType::OF);
 
         if (condition) {
@@ -604,18 +591,16 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JL taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JL taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JL not taken" << std::endl;
+                std::cout << "JL not taken" << std::endl;
             }
         }
     }
 
     void CPU::ExecuteJle(const Instruction& instr) {
-        // JLE: sauter si moins ou égal (signed comparison)
-        // Condition: ZERO || (NEGATIVE != OVERFLOW)
         bool condition = GetFlag(FlagType::ZERO) ||
                         (GetFlag(FlagType::NEGATIVE) != GetFlag(FlagType::OF));
 
@@ -624,11 +609,11 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JLE taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JLE taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JLE not taken" << std::endl;
+                std::cout << "JLE not taken" << std::endl;
             }
         }
     }
@@ -644,18 +629,16 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JG taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JG taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JG not taken" << std::endl;
+                std::cout << "JG not taken" << std::endl;
             }
         }
     }
 
     void CPU::ExecuteJge(const Instruction& instr) {
-        // JGE: sauter si plus grand ou égal (signed comparison)
-        // Condition: NEGATIVE == OVERFLOW
         bool condition = GetFlag(FlagType::NEGATIVE) == GetFlag(FlagType::OF);
 
         if (condition) {
@@ -663,24 +646,22 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "✅ JGE taken to address 0x" << std::hex << address << std::endl;
+                std::cout << "JGE taken to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "❌ JGE not taken" << std::endl;
+                std::cout << "JGE not taken" << std::endl;
             }
         }
     }
 
     void CPU::ExecuteIn(const Instruction& instr) {
-        // IN: Lecture depuis un port (simulation simple)
         uint64_t port = GetOperandValue(instr, true);
         uint64_t value = 0;
 
-        // Simulation basique des ports
         switch (port) {
             case 0: // Port clavier (simulation)
-                std::cout << "📥 Input from keyboard: ";
+                std::cout << "Input from keyboard: ";
                 std::cin >> value;
                 break;
             case 1: // Port timer (simulation)
@@ -689,7 +670,7 @@ namespace vm {
             default:
                 value = 0; // Port non supporté
                 if (mDebug) {
-                    std::cout << "⚠️ Unsupported port: " << port << std::endl;
+                    std::cout << "Unsupported port: " << port << std::endl;
                 }
         }
 
@@ -697,34 +678,32 @@ namespace vm {
         UpdateFlags(value);
 
         if (mDebug) {
-            std::cout << "📥 IN from port " << std::dec << port
+            std::cout << "IN from port " << std::dec << port
                       << " → R" << static_cast<int>(instr.reg1)
                       << " = 0x" << std::hex << value << std::endl;
         }
     }
 
     void CPU::ExecuteOut(const Instruction& instr) {
-        // OUT: Écriture vers un port (simulation simple)
         uint64_t port = instr.immediate;
         uint64_t value = mRegisters[instr.reg1];
 
-        // Simulation basique des ports
         switch (port) {
-            case 0: // Port écran (simulation)
-                std::cout << "📺 Screen output: " << std::dec << value
+            case 0:
+                std::cout << "Screen output: " << std::dec << value
                           << " (char: '" << static_cast<char>(value & 0xFF) << "')" << std::endl;
                 break;
-            case 1: // Port série (simulation)
-                std::cout << "📡 Serial output: 0x" << std::hex << value << std::endl;
+            case 1:
+                std::cout << "Serial output: 0x" << std::hex << value << std::endl;
                 break;
             default:
                 if (mDebug) {
-                    std::cout << "⚠️ Unsupported output port: " << std::dec << port << std::endl;
+                    std::cout << "Unsupported output port: " << std::dec << port << std::endl;
                 }
         }
 
         if (mDebug) {
-            std::cout << "📤 OUT R" << static_cast<int>(instr.reg1)
+            std::cout << "OUT R" << static_cast<int>(instr.reg1)
                       << " (0x" << std::hex << value << ") to port "
                       << std::dec << port << std::endl;
         }
@@ -735,11 +714,10 @@ namespace vm {
         mRegisters[instr.reg1] = mRegisters[instr.reg2];
         mRegisters[instr.reg2] = temp;
 
-        // Mettre à jour les flags selon la valeur dans reg1
         UpdateFlags(mRegisters[instr.reg1]);
 
         if (mDebug) {
-            std::cout << "🔄 SWAP R" << static_cast<int>(instr.reg1)
+            std::cout << "SWAP R" << static_cast<int>(instr.reg1)
                       << " ⇄ R" << static_cast<int>(instr.reg2)
                       << " (R" << static_cast<int>(instr.reg1) << "=0x" << std::hex
                       << mRegisters[instr.reg1] << ", R" << static_cast<int>(instr.reg2)
@@ -748,8 +726,6 @@ namespace vm {
     }
 
     void CPU::ExecuteLoop(const Instruction& instr) {
-        // LOOP: décrémente le registre et saute si non-zéro
-        // Utilise reg1 comme compteur et immediate comme adresse de saut
         uint64_t counter = mRegisters[instr.reg1];
         counter--;
         mRegisters[instr.reg1] = counter;
@@ -759,12 +735,12 @@ namespace vm {
             mPC = address;
 
             if (mDebug) {
-                std::cout << "🔁 LOOP taken (counter=" << std::dec << counter
+                std::cout << "LOOP taken (counter=" << std::dec << counter
                           << ") to address 0x" << std::hex << address << std::endl;
             }
         } else {
             if (mDebug) {
-                std::cout << "🏁 LOOP finished (counter=0)" << std::endl;
+                std::cout << "LOOP finished (counter=0)" << std::endl;
             }
         }
 
@@ -774,11 +750,11 @@ namespace vm {
     void CPU::ExecutePrint(const Instruction& instr) {
         uint64_t value = GetOperandValue(instr);
 
-        std::cout << "📟 PRINT: " << std::dec << value
+        std::cout << "PRINT: " << std::dec << value
                   << " (0x" << std::hex << value << ")" << std::endl;
 
         if (mDebug) {
-            std::cout << "🖨️ PRINT executed: value=" << std::dec << value << std::endl;
+            std::cout << "PRINT executed: value=" << std::dec << value << std::endl;
         }
     }
 
@@ -849,7 +825,7 @@ namespace vm {
                   << " O:" << (GetFlag(FlagType::OF) ? "1" : "0") << "           │" << std::endl;
         std::cout << "└─────────────────┘" << std::endl;
 
-        std::cout << "\n📋 Registers:" << std::endl;
+        std::cout << "\nRegisters:" << std::endl;
         for (size_t i = 0; i < REGISTER_COUNT; i += 4) {
             for (size_t j = 0; j < 4 && (i + j) < REGISTER_COUNT; ++j) {
                 size_t reg_idx = i + j;
@@ -865,7 +841,7 @@ namespace vm {
     void CPU::HandleInterrupt(int num) {
         // Basic interrupt implementation
         if (mDebug) {
-            std::cout << "⚡ Interrupt " << num << " triggered" << std::endl;
+            std::cout << "Interrupt " << num << " triggered" << std::endl;
         }
 
         // Save current state

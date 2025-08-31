@@ -20,22 +20,18 @@ namespace vm {
         }
 
         try {
-            // Préparer l'en-tête
             FirmwareHeader header;
             header.mInstructionCount = static_cast<uint32_t>(instructions.size());
             header.mEntryPoint = entryPoint;
             header.mTimestamp = GetCurrentTimestamp();
             header.mDescriptionSize = static_cast<uint32_t>(description.length());
 
-            // Écrire l'en-tête
             file.write(reinterpret_cast<const char*>(&header), sizeof(FirmwareHeader));
 
-            // Écrire la description
             if (!description.empty()) {
                 file.write(description.c_str(), description.length());
             }
 
-            // Écrire les instructions
             for (uint64_t instruction : instructions) {
                 file.write(reinterpret_cast<const char*>(&instruction), sizeof(uint64_t));
             }
@@ -63,7 +59,6 @@ namespace vm {
         }
 
         try {
-            // Lire l'en-tête
             FirmwareHeader header;
             file.read(reinterpret_cast<char*>(&header), sizeof(FirmwareHeader));
             
@@ -72,18 +67,15 @@ namespace vm {
                 return false;
             }
 
-            // Valider l'en-tête
             if (!ValidateHeader(header)) {
                 std::cerr << "Error: Invalid firmware header" << std::endl;
                 return false;
             }
 
-            // Lire la description (mais on l'ignore pour le chargement)
             if (header.mDescriptionSize > 0) {
                 file.seekg(header.mDescriptionSize, std::ios::cur);
             }
 
-            // Lire les instructions
             instructions.clear();
             instructions.reserve(header.mInstructionCount);
 

@@ -54,7 +54,6 @@ namespace vm {
             return false;
         }
 
-        // Vérifier que le programme peut être chargé à l'adresse spécifiée
         uint64_t programSize = program.size() * 8; // 8 bytes per instruction
         if (startAddress + programSize > mMemory->GetSize()) {
             if (mDebugMode) {
@@ -64,13 +63,11 @@ namespace vm {
         }
 
         try {
-            // Charger le programme en mémoire
             for (size_t i = 0; i < program.size(); ++i) {
                 uint64_t address = startAddress + (i * 8);
                 mMemory->Write64(address, program[i]);
             }
 
-            // Positionner le PC au début du programme
             mCPU->SetPC(startAddress);
             
             if (mDebugMode) {
