@@ -48,7 +48,7 @@ namespace vm {
         INC = 0x15,
         DEC = 0x16,
         CMP = 0x17,
-        SWAP = 0x18, //Swap 2 registers
+        SWAP = 0x18,
 
         // Logical instructions
         AND = 0x20,
@@ -62,21 +62,25 @@ namespace vm {
         JMP = 0x30,
         JZ = 0x31,
         JNZ = 0x32,
-        JEQ = 0x33,    // Jump if Equal (alias for JZ)
-        JNE = 0x34,    // Jump if Not Equal (alias for JNZ)
+        JEQ = 0x33,
+        JNE = 0x34,
         JC = 0x35,
         JNC = 0x36,
         CALL = 0x37,
         RET = 0x38,
         NOP = 0x39,
 
-        JL   = 0x3A,  // Jump if Less
-        JLE  = 0x3B,  // Jump if Less or Equal
-        JG   = 0x3C,  // Jump if Greater
-        JGE  = 0x3D,  // Jump if Greater or Equal
+        // Jump instructions
+        JL   = 0x3A,
+        JLE  = 0x3B,
+        JG   = 0x3C,
+        JGE  = 0x3D,
         LOOP = 0x3E,
 
-        PRINT = 0x44,  // Afficher une valeur
+        // I/O instructions
+        IN = 0x40,
+        OUT = 0x41,
+        PRINT = 0x44,
 
     };
 

@@ -20,6 +20,8 @@ namespace vm {
             case Opcode::STORE: return "STORE";
             case Opcode::PUSH:  return "PUSH";
             case Opcode::POP:   return "POP";
+            case Opcode::HLT:   return "HLT";
+
             case Opcode::ADD:   return "ADD";
             case Opcode::SUB:   return "SUB";
             case Opcode::MUL:   return "MUL";
@@ -28,12 +30,15 @@ namespace vm {
             case Opcode::INC:   return "INC";
             case Opcode::DEC:   return "DEC";
             case Opcode::CMP:   return "CMP";
+            case Opcode::SWAP:  return "SWAP";
+
             case Opcode::AND:   return "AND";
             case Opcode::OR:    return "OR";
             case Opcode::XOR:   return "XOR";
             case Opcode::NOT:   return "NOT";
             case Opcode::SHL:   return "SHL";
             case Opcode::SHR:   return "SHR";
+
             case Opcode::JMP:   return "JMP";
             case Opcode::JZ:    return "JZ";
             case Opcode::JNZ:   return "JNZ";
@@ -41,9 +46,19 @@ namespace vm {
             case Opcode::JNE:   return "JNE";
             case Opcode::JC:    return "JC";
             case Opcode::JNC:   return "JNC";
+            case Opcode::JL:    return "JL";
+            case Opcode::JLE:   return "JLE";
+            case Opcode::JG:    return "JG";
+            case Opcode::JGE:   return "JGE";
+            case Opcode::LOOP:  return "LOOP";
             case Opcode::CALL:  return "CALL";
             case Opcode::RET:   return "RET";
             case Opcode::NOP:   return "NOP";
+
+            case Opcode::PRINT: return "PRINT";
+            case Opcode::IN:    return "IN";
+            case Opcode::OUT:   return "OUT";
+
             default:            return "UNKNOWN";
         }
     }
@@ -140,23 +155,44 @@ namespace vm {
             case Opcode::STORE: ExecuteStore(instr); break;
             case Opcode::PUSH:  ExecutePush(instr); break;
             case Opcode::POP:   ExecutePop(instr); break;
+
             case Opcode::ADD:   ExecuteAdd(instr); break;
             case Opcode::SUB:   ExecuteSub(instr); break;
+            case Opcode::MUL:   ExecuteMul(instr); break;
+            case Opcode::DIV:   ExecuteDiv(instr); break;
+            case Opcode::MOD:   ExecuteMod(instr); break;
+            case Opcode::INC:   ExecuteInc(instr); break;
+            case Opcode::DEC:   ExecuteDec(instr); break;
             case Opcode::CMP:   ExecuteCmp(instr); break;
+            case Opcode::SWAP:  ExecuteSwap(instr); break;
+
+            case Opcode::AND:   ExecuteAnd(instr); break;
+            case Opcode::OR:    ExecuteOr(instr); break;
+            case Opcode::XOR:   ExecuteXor(instr); break;
+            case Opcode::NOT:   ExecuteNot(instr); break;
+            case Opcode::SHL:   ExecuteShl(instr); break;
+            case Opcode::SHR:   ExecuteShr(instr); break;
+
             case Opcode::JMP:   ExecuteJmp(instr); break;
             case Opcode::JZ:    ExecuteJz(instr); break;
             case Opcode::JNZ:   ExecuteJnz(instr); break;
             case Opcode::JEQ:   ExecuteJeq(instr); break;
             case Opcode::JNE:   ExecuteJne(instr); break;
+            case Opcode::JC:    ExecuteJc(instr); break;
+            case Opcode::JNC:   ExecuteJnc(instr); break;
+            case Opcode::JL:    ExecuteJl(instr); break;
+            case Opcode::JLE:   ExecuteJle(instr); break;
+            case Opcode::JG:    ExecuteJg(instr); break;
+            case Opcode::JGE:   ExecuteJge(instr); break;
+
+            case Opcode::LOOP:  ExecuteLoop(instr); break;
             case Opcode::CALL:  ExecuteCall(instr); break;
             case Opcode::RET:   ExecuteRet(instr); break;
-            case Opcode::HLT:   ExecuteHlt(instr); break;
-            case Opcode::INC:   ExecuteInc(instr); break;
-            case Opcode::DEC:   ExecuteDec(instr); break;
-            case Opcode::MUL:   ExecuteMul(instr); break;
-            case Opcode::DIV:   ExecuteDiv(instr); break;
-            case Opcode::MOD:   ExecuteMod(instr); break;
 
+            case Opcode::HLT:   ExecuteHlt(instr); break;
+            case Opcode::PRINT: ExecutePrint(instr); break;
+            case Opcode::IN:    ExecuteIn(instr); break;
+            case Opcode::OUT:   ExecuteOut(instr); break;
             case Opcode::NOP:   break; // Do nothing
             default:
                 std::cerr << "❌ Unimplemented instruction: " << OpcodeToString(instr.opcode)
@@ -434,6 +470,318 @@ namespace vm {
         }
     }
 
+    void CPU::ExecuteAnd(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+        uint64_t result = op1 & op2;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "🔗 AND R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") & 0x" << op2
+                      << " = 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteOr(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+        uint64_t result = op1 | op2;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "🔀 OR R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") | 0x" << op2
+                      << " = 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteXor(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t op2 = GetOperandValue(instr, true);
+        uint64_t result = op1 ^ op2;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "⚡ XOR R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") ^ 0x" << op2
+                      << " = 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteNot(const Instruction& instr) {
+        uint64_t value = mRegisters[instr.reg1];
+        uint64_t result = ~value;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result);
+
+        if (mDebug) {
+            std::cout << "🚫 NOT R" << static_cast<int>(instr.reg1)
+                      << " (~0x" << std::hex << value << ") = 0x" << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteShl(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t shift_amount = GetOperandValue(instr, true) & 0x3F; // Limiter à 63
+        uint64_t result = op1 << shift_amount;
+
+        // Carry flag = dernier bit décalé
+        bool carry = shift_amount > 0 ? (op1 >> (64 - shift_amount)) & 1 : false;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result, carry);
+
+        if (mDebug) {
+            std::cout << "⬅️ SHL R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") << " << std::dec << shift_amount
+                      << " = 0x" << std::hex << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteShr(const Instruction& instr) {
+        uint64_t op1 = mRegisters[instr.reg1];
+        uint64_t shift_amount = GetOperandValue(instr, true) & 0x3F; // Limiter à 63
+        uint64_t result = op1 >> shift_amount;
+
+        // Carry flag = dernier bit décalé
+        bool carry = shift_amount > 0 ? (op1 >> (shift_amount - 1)) & 1 : false;
+
+        mRegisters[instr.reg1] = result;
+        UpdateFlags(result, carry);
+
+        if (mDebug) {
+            std::cout << "➡️ SHR R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << op1 << ") >> " << std::dec << shift_amount
+                      << " = 0x" << std::hex << result << std::endl;
+        }
+    }
+
+    void CPU::ExecuteJc(const Instruction& instr) {
+        if (GetFlag(FlagType::CARRY)) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JC taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JC not taken (CARRY flag not set)" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJnc(const Instruction& instr) {
+        if (!GetFlag(FlagType::CARRY)) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JNC taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JNC not taken (CARRY flag is set)" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJl(const Instruction& instr) {
+        // JL: sauter si moins (signed comparison)
+        // Condition: NEGATIVE != OVERFLOW
+        bool condition = GetFlag(FlagType::NEGATIVE) != GetFlag(FlagType::OF);
+
+        if (condition) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JL taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JL not taken" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJle(const Instruction& instr) {
+        // JLE: sauter si moins ou égal (signed comparison)
+        // Condition: ZERO || (NEGATIVE != OVERFLOW)
+        bool condition = GetFlag(FlagType::ZERO) ||
+                        (GetFlag(FlagType::NEGATIVE) != GetFlag(FlagType::OF));
+
+        if (condition) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JLE taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JLE not taken" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJg(const Instruction& instr) {
+        // JG: sauter si plus grand (signed comparison)
+        // Condition: !ZERO && (NEGATIVE == OVERFLOW)
+        bool condition = !GetFlag(FlagType::ZERO) &&
+                        (GetFlag(FlagType::NEGATIVE) == GetFlag(FlagType::OF));
+
+        if (condition) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JG taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JG not taken" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteJge(const Instruction& instr) {
+        // JGE: sauter si plus grand ou égal (signed comparison)
+        // Condition: NEGATIVE == OVERFLOW
+        bool condition = GetFlag(FlagType::NEGATIVE) == GetFlag(FlagType::OF);
+
+        if (condition) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "✅ JGE taken to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "❌ JGE not taken" << std::endl;
+            }
+        }
+    }
+
+    void CPU::ExecuteIn(const Instruction& instr) {
+        // IN: Lecture depuis un port (simulation simple)
+        uint64_t port = GetOperandValue(instr, true);
+        uint64_t value = 0;
+
+        // Simulation basique des ports
+        switch (port) {
+            case 0: // Port clavier (simulation)
+                std::cout << "📥 Input from keyboard: ";
+                std::cin >> value;
+                break;
+            case 1: // Port timer (simulation)
+                value = static_cast<uint64_t>(std::time(nullptr)) & 0xFFFFFFFF;
+                break;
+            default:
+                value = 0; // Port non supporté
+                if (mDebug) {
+                    std::cout << "⚠️ Unsupported port: " << port << std::endl;
+                }
+        }
+
+        mRegisters[instr.reg1] = value;
+        UpdateFlags(value);
+
+        if (mDebug) {
+            std::cout << "📥 IN from port " << std::dec << port
+                      << " → R" << static_cast<int>(instr.reg1)
+                      << " = 0x" << std::hex << value << std::endl;
+        }
+    }
+
+    void CPU::ExecuteOut(const Instruction& instr) {
+        // OUT: Écriture vers un port (simulation simple)
+        uint64_t port = instr.immediate;
+        uint64_t value = mRegisters[instr.reg1];
+
+        // Simulation basique des ports
+        switch (port) {
+            case 0: // Port écran (simulation)
+                std::cout << "📺 Screen output: " << std::dec << value
+                          << " (char: '" << static_cast<char>(value & 0xFF) << "')" << std::endl;
+                break;
+            case 1: // Port série (simulation)
+                std::cout << "📡 Serial output: 0x" << std::hex << value << std::endl;
+                break;
+            default:
+                if (mDebug) {
+                    std::cout << "⚠️ Unsupported output port: " << std::dec << port << std::endl;
+                }
+        }
+
+        if (mDebug) {
+            std::cout << "📤 OUT R" << static_cast<int>(instr.reg1)
+                      << " (0x" << std::hex << value << ") to port "
+                      << std::dec << port << std::endl;
+        }
+    }
+
+    void CPU::ExecuteSwap(const Instruction& instr) {
+        uint64_t temp = mRegisters[instr.reg1];
+        mRegisters[instr.reg1] = mRegisters[instr.reg2];
+        mRegisters[instr.reg2] = temp;
+
+        // Mettre à jour les flags selon la valeur dans reg1
+        UpdateFlags(mRegisters[instr.reg1]);
+
+        if (mDebug) {
+            std::cout << "🔄 SWAP R" << static_cast<int>(instr.reg1)
+                      << " ⇄ R" << static_cast<int>(instr.reg2)
+                      << " (R" << static_cast<int>(instr.reg1) << "=0x" << std::hex
+                      << mRegisters[instr.reg1] << ", R" << static_cast<int>(instr.reg2)
+                      << "=0x" << mRegisters[instr.reg2] << ")" << std::endl;
+        }
+    }
+
+    void CPU::ExecuteLoop(const Instruction& instr) {
+        // LOOP: décrémente le registre et saute si non-zéro
+        // Utilise reg1 comme compteur et immediate comme adresse de saut
+        uint64_t counter = mRegisters[instr.reg1];
+        counter--;
+        mRegisters[instr.reg1] = counter;
+
+        if (counter != 0) {
+            uint64_t address = GetOperandValue(instr);
+            mPC = address;
+
+            if (mDebug) {
+                std::cout << "🔁 LOOP taken (counter=" << std::dec << counter
+                          << ") to address 0x" << std::hex << address << std::endl;
+            }
+        } else {
+            if (mDebug) {
+                std::cout << "🏁 LOOP finished (counter=0)" << std::endl;
+            }
+        }
+
+        UpdateFlags(counter);
+    }
+
+    void CPU::ExecutePrint(const Instruction& instr) {
+        uint64_t value = GetOperandValue(instr);
+
+        std::cout << "📟 PRINT: " << std::dec << value
+                  << " (0x" << std::hex << value << ")" << std::endl;
+
+        if (mDebug) {
+            std::cout << "🖨️ PRINT executed: value=" << std::dec << value << std::endl;
+        }
+    }
+
     void CPU::SetOperandValue(const Instruction& instr, uint64_t value, bool isSecondOperand) {
         uint8_t reg = isSecondOperand ? instr.reg2 : instr.reg1;
 
@@ -519,18 +867,18 @@ namespace vm {
         if (mDebug) {
             std::cout << "⚡ Interrupt " << num << " triggered" << std::endl;
         }
-        
+
         // Save current state
         mSP -= 8;
         mMemory->Write64(mSP, mPC);
         mSP -= 8;
         mMemory->Write64(mSP, mFlags);
-        
+
         // Jump to interrupt handler
         // For now, use a simple table
         uint64_t handlerAddress = num * 8; // Each entry is 8 bytes
         mPC = mMemory->Read64(handlerAddress);
-        
+
         // Disable interrupts during handling
         SetFlag(FlagType::INTERRUPT, false);
     }

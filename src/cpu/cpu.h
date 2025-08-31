@@ -42,6 +42,12 @@ namespace vm {
         void ExecuteJnz(const Instruction& instr);
         void ExecuteJeq(const Instruction& instr);
         void ExecuteJne(const Instruction& instr);
+        void ExecuteJc(const Instruction& instr);
+        void ExecuteJnc(const Instruction& instr);
+        void ExecuteJl(const Instruction& instr);
+        void ExecuteJle(const Instruction& instr);
+        void ExecuteJg(const Instruction& instr);
+        void ExecuteJge(const Instruction& instr);
         void ExecuteCall(const Instruction& instr);
         void ExecuteRet(const Instruction& instr);
         void ExecuteHlt(const Instruction& instr);
@@ -56,8 +62,6 @@ namespace vm {
         void ExecuteNot(const Instruction& instr);
         void ExecuteShl(const Instruction& instr);
         void ExecuteShr(const Instruction& instr);
-        void ExecuteJc(const Instruction& instr);
-        void ExecuteJnc(const Instruction& instr);
         void ExecuteIn(const Instruction& instr);
         void ExecuteOut(const Instruction& instr);
         void ExecutePrint(const Instruction& instr);
